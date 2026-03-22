@@ -1,0 +1,12 @@
+{
+  "project_name": "SocialYield",
+  "repo_url": "https://github.com/<YOUR_USERNAME>/socialyield",
+  "commit_sha": "<FILL_AFTER_FINAL_COMMIT>",
+  "rollup_chain_id": "socialyield-1",
+  "deployed_address": "0x06efc61F8F356aEE6e43a3048B16538af9c9F3Ba",
+  "vm": "evm",
+  "native_feature": "initia-usernames",
+  "core_logic_path": "contracts/src/BatchDEX.sol",
+  "native_feature_frontend_path": "frontend/src/hooks/useInitiaUsernames.ts",
+  "demo_video_url": "<FILL_AFTER_RECORDING>"
+}
