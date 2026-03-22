@@ -18,7 +18,7 @@ import {
 } from '@/hooks/useYieldRegistry'
 import { useUsername, shortenAddress } from '@/hooks/useInitiaUsernames'
 import TransactionStatus from '@/components/TransactionStatus'
-import { Coins, Users, Clock, Gift, UserPlus, UserMinus, ExternalLink } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 export default function EarnPage() {
   const { address } = useAccount()
@@ -50,12 +50,15 @@ export default function EarnPage() {
 
   if (!initiaAddress) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <h1 className="text-4xl font-bold mb-4 gradient-text">Earn Yield</h1>
-        <p className="text-dark-400 mb-8">
-          Connect your wallet to register your .init name and start earning MEV yield.
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h1 className="font-heading italic text-6xl text-white mb-6 tracking-tight">Earn</h1>
+        <p className="font-body text-white/50 text-lg mb-8 max-w-md text-center">
+          Connect your wallet to register your .init name and start earning passive MEV yield.
         </p>
-        <button onClick={() => openConnect?.()} className="btn-primary px-8 py-3">
+        <button 
+          onClick={() => openConnect?.()} 
+          className="liquid-glass-teal rounded-full px-8 py-4 font-body font-medium text-[#00ff87] hover:scale-105 transition-transform"
+        >
           Connect Wallet
         </button>
       </div>
@@ -63,210 +66,209 @@ export default function EarnPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 gradient-text">Earn Yield</h1>
-
-      {/* Yield Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <Coins className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Epoch Rewards</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100 font-mono">
-            {epochDeposits ? parseFloat(formatEther(epochDeposits)).toFixed(2) : '0.00'} SYLD
-          </p>
+    <div className="max-w-7xl mx-auto px-4 py-8 mt-12 space-y-8 animate-fade-in">
+      <h1 className="font-heading italic text-5xl text-white mb-2 tracking-tight">Earn Yield</h1>
+      
+      {/* Hero Stat Bar */}
+      <div className="liquid-glass rounded-3xl p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-2">Epoch Rewards</span>
+          <span className="font-heading italic text-3xl text-white">
+            {epochDeposits ? parseFloat(formatEther(epochDeposits)).toFixed(2) : '0.00'} <span className="text-[#00ff87]/50 text-lg not-italic font-body">SYLD</span>
+          </span>
         </div>
-
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <Gift className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Your Pending</span>
-          </div>
-          <p className="text-2xl font-bold text-green-400 font-mono">
-            {pendingAmount ? parseFloat(formatEther(pendingAmount)).toFixed(4) : '0.00'} SYLD
-          </p>
+        <div>
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-2">Your Pending</span>
+          <span className="font-heading italic text-3xl text-[#00ff87]">
+            {pendingAmount ? parseFloat(formatEther(pendingAmount)).toFixed(4) : '0.00'} <span className="text-[#00ff87]/50 text-lg not-italic font-body">SYLD</span>
+          </span>
         </div>
-
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Active Holders</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100">{holderCount?.toString() || '0'}</p>
+        <div>
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-2">Active Holders</span>
+          <span className="font-heading italic text-3xl text-white">
+            {holderCount?.toString() || '0'}
+          </span>
         </div>
-
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Epoch {currentEpoch?.toString()}</span>
+        <div>
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-2">
+            Epoch {currentEpoch?.toString()}
+          </span>
+          <div className="flex items-end gap-2">
+            <span className="font-heading italic text-3xl text-white">
+              {blocksUntil?.toString() || '—'}
+            </span>
+            <span className="font-body text-white/40 mb-1.5">blocks left</span>
           </div>
-          <p className="text-2xl font-bold text-dark-100">
-            {blocksUntil?.toString() || '—'} <span className="text-sm text-dark-500">blocks left</span>
-          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Registration Card */}
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold mb-4 text-dark-100 flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-teal-400" />
-            Registration
-          </h2>
-
+      {/* Registration & Claim Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 liquid-glass rounded-3xl p-8">
+        
+        {/* Left: Registration */}
+        <div className="flex flex-col justify-center lg:pr-8 lg:border-r border-white/10">
           {usernameLoading ? (
-            <div className="text-dark-500 text-sm">Checking .init name ownership...</div>
+            <div className="animate-pulse">
+              <div className="h-6 w-32 bg-white/10 rounded mb-4" />
+              <div className="h-4 w-48 bg-white/5 rounded" />
+            </div>
           ) : isRegistered ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-green-400 font-medium text-sm">Registered</span>
-                </div>
-                <p className="text-dark-200">
-                  .init name: <span className="font-mono text-teal-400">{(holderInfo as any)?.initName}</span>
-                </p>
-                <p className="text-dark-500 text-sm mt-1">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#00ff87] animate-pulse shadow-[0_0_8px_rgba(0,255,135,0.6)]" />
+                <span className="font-body text-xs text-[#00ff87] tracking-wider uppercase">Registered</span>
+              </div>
+              <div>
+                <span className="text-white/40 font-body text-sm block mb-1">.init name:</span>
+                <span className="font-heading italic text-[#00ff87] text-4xl block mb-2">
+                  {(holderInfo as any)?.initName}
+                </span>
+                <span className="text-white/40 font-body text-sm">
                   Since epoch {(holderInfo as any)?.registeredEpoch?.toString()}
-                </p>
+                </span>
               </div>
               <button
                 onClick={() => deregisterHook.deregister()}
                 disabled={deregisterHook.isPending}
-                className="flex items-center gap-2 btn-secondary text-sm w-full justify-center"
+                className="text-white/40 hover:text-[#ff6b6b] font-body text-sm transition-colors mt-4 self-start"
               >
-                <UserMinus className="w-4 h-4" />
                 {deregisterHook.isPending ? 'Deregistering...' : 'Deregister'}
               </button>
             </div>
           ) : hasUsername ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-teal-500/5 border border-teal-500/20">
-                <p className="text-dark-200 text-sm mb-1">Your .init name:</p>
-                <p className="text-xl font-bold gradient-text">{initName}</p>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-heading italic text-white text-3xl mb-3">You qualify for yield.</h3>
+                <p className="font-body text-white/50 leading-relaxed">
+                  Your .init name <span className="text-[#00ff87]">{initName}</span> makes you eligible to earn MEV yield every epoch.
+                </p>
               </div>
               <button
                 onClick={() => initName && registerHook.register(initName)}
                 disabled={registerHook.isPending}
-                className="btn-primary w-full text-sm py-3"
+                className="w-full liquid-glass-teal rounded-2xl py-4 font-body font-medium text-white transition-transform hover:scale-[1.02]"
               >
-                {registerHook.isPending ? 'Registering...' : `Register ${initName} for Yield`}
+                {registerHook.isPending ? 'Registering...' : 'Register for Yield'}
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
-                <p className="text-yellow-400 font-medium text-sm mb-2">
-                  .init name required
-                </p>
-                <p className="text-dark-400 text-sm">
-                  You need a .init name to earn MEV yield. Get one on the Initia app.
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-heading italic text-white text-3xl mb-3">Get a .init name first.</h3>
+                <p className="font-body text-white/50 leading-relaxed">
+                  Register a .init name on Initia to participate in yield distribution.
                 </p>
               </div>
               <a
                 href="https://app.testnet.initia.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary w-full text-sm py-3 flex items-center justify-center gap-2"
+                className="inline-flex items-center justify-center gap-2 w-full liquid-glass rounded-2xl py-4 font-body font-medium text-white transition-colors hover:bg-white/5"
               >
-                Get a .init name <ExternalLink className="w-3.5 h-3.5" />
+                Get .init Name <ArrowUpRight className="w-4 h-4" />
               </a>
             </div>
           )}
         </div>
 
-        {/* Claim Card */}
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold mb-4 text-dark-100 flex items-center gap-2">
-            <Gift className="w-5 h-5 text-teal-400" />
-            Claim Rewards
-          </h2>
-
-          {isRegistered && pendingAmount && pendingAmount > BigInt(0) ? (
-            <div className="space-y-4">
-              <div className="text-center py-8">
-                <p className="text-dark-500 text-sm mb-2">Available to claim</p>
-                <p className="text-4xl font-bold gradient-text mb-1">
-                  {parseFloat(formatEther(pendingAmount)).toFixed(4)}
-                </p>
-                <p className="text-dark-500 text-sm">SYLD</p>
+        {/* Right: Claim Rewards */}
+        <div className="flex flex-col justify-center mt-8 lg:mt-0 lg:pl-4">
+          {pendingAmount && pendingAmount > BigInt(0) ? (
+            <div className="space-y-6 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div>
+                <span className="font-heading italic text-teal-400 text-6xl block mb-2 text-[#00ff87]">
+                  {parseFloat(formatEther(pendingAmount)).toFixed(4)} <span className="text-2xl not-italic font-body text-[#00ff87]/50">SYLD</span>
+                </span>
+                <span className="text-white/40 font-body">Available to claim</span>
               </div>
               <button
                 onClick={() => claimHook.claim()}
                 disabled={claimHook.isPending}
-                className="btn-primary w-full py-3"
+                className="w-full liquid-glass-teal rounded-2xl py-4 font-body font-medium text-white transition-transform hover:scale-[1.02] relative overflow-hidden group"
               >
-                {claimHook.isPending ? 'Claiming...' : `Claim ${parseFloat(formatEther(pendingAmount)).toFixed(4)} SYLD`}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                {claimHook.isPending ? 'Claiming...' : 'Claim Rewards'}
               </button>
+              <div className="text-white/30 font-body text-xs w-full text-center">
+                Per-holder reward: {rewardPerHolder ? parseFloat(formatEther(rewardPerHolder)).toFixed(4) : '0'} SYLD this epoch
+              </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-dark-500 text-sm">
-                {isRegistered
-                  ? 'No pending rewards yet. Rewards accumulate each epoch.'
-                  : 'Register your .init name to start earning.'}
-              </p>
+            <div className="space-y-6 flex flex-col items-center justify-center text-center h-full">
+              {isRegistered ? (
+                <>
+                  <div className="text-white/30 font-body leading-relaxed max-w-sm mb-4">
+                    No pending rewards yet. Rewards accumulate each epoch.
+                  </div>
+                  <button
+                    onClick={() => finalizeHook.finalize()}
+                    disabled={finalizeHook.isPending || (blocksUntil !== undefined && blocksUntil > BigInt(0))}
+                    className="liquid-glass rounded-xl px-6 py-3 font-body text-sm text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:hover:text-white/60"
+                  >
+                    {finalizeHook.isPending
+                      ? 'Finalizing...'
+                      : `Finalize Epoch ${currentEpoch?.toString() || ''}`}
+                  </button>
+                  <div className="text-white/30 font-body text-xs">
+                    Per-holder reward: {rewardPerHolder ? parseFloat(formatEther(rewardPerHolder)).toFixed(4) : '0'} SYLD
+                  </div>
+                </>
+              ) : (
+                <div className="text-white/30 font-body leading-relaxed max-w-sm">
+                  Register your .init name to start earning.
+                </div>
+              )}
             </div>
           )}
-
-          {/* Finalize epoch button */}
-          <div className="mt-4 pt-4 border-t border-dark-700/30">
-            <button
-              onClick={() => finalizeHook.finalize()}
-              disabled={finalizeHook.isPending || (blocksUntil !== undefined && blocksUntil > BigInt(0))}
-              className="btn-secondary w-full text-xs py-2"
-            >
-              {finalizeHook.isPending
-                ? 'Finalizing...'
-                : `Finalize Epoch ${currentEpoch?.toString() || ''}`}
-            </button>
-            <p className="text-dark-600 text-xs mt-1 text-center">
-              Per-holder reward: {rewardPerHolder ? parseFloat(formatEther(rewardPerHolder)).toFixed(4) : '0'} SYLD
-            </p>
-          </div>
         </div>
       </div>
 
-      {/* Holders Leaderboard */}
-      <div className="glass-card p-6">
-        <h2 className="text-lg font-semibold mb-4 text-dark-100 flex items-center gap-2">
-          <Users className="w-5 h-5 text-teal-400" />
-          Registered Holders
-        </h2>
-        <div className="overflow-x-auto rounded-lg border border-dark-700/30">
-          <table className="table-dark">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Address</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!holderList || holderList.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center text-dark-500 py-8">
-                    No holders registered yet. Be the first!
-                  </td>
-                </tr>
-              ) : (
-                holderList.slice(0, 20).map((addr: string, i: number) => (
-                  <tr key={addr}>
-                    <td className="text-dark-500 font-mono">{i + 1}</td>
-                    <td className="font-mono text-sm">{shortenAddress(addr)}</td>
-                    <td>
-                      <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">
-                        Active
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Registered Holders Table */}
+      <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.005]">
+        <h2 className="font-heading italic text-white text-2xl mb-6 pl-2">Registered Holders</h2>
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
+          {!holderList || holderList.length === 0 ? (
+            <div className="text-center text-white/30 font-body py-8">
+              No holders registered yet. Be the first!
+            </div>
+          ) : (
+            holderList.slice(0, 50).map((addr: string, i: number) => (
+              <div key={addr} className="liquid-glass rounded-xl px-5 py-3.5 flex items-center justify-between group hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-6">
+                  <span className="text-white/20 font-body text-sm w-6">{i + 1}</span>
+                  <span className="font-heading italic text-[#00ff87] text-xl">name.init</span>
+                  <span className="text-white/40 font-mono text-xs hidden sm:block">{shortenAddress(addr)}</span>
+                </div>
+                <div className="liquid-glass rounded-full px-3 py-1 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00ff87] shadow-[0_0_5px_rgba(0,255,135,0.5)]" />
+                  <span className="font-body text-[10px] text-[#00ff87] tracking-wider uppercase">Active</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
+
+      {/* CSS for custom scrollbar and shimmer */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+        .custom-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}} />
 
       {/* Transaction statuses */}
       {(registerHook.isPending || registerHook.isSuccess || registerHook.error) && (

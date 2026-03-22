@@ -15,23 +15,13 @@ import {
 } from '@/hooks/useYieldRegistry'
 import { CONTRACTS, REVENUE_ROUTER_ABI } from '@/lib/contracts'
 import { useReadContract } from 'wagmi'
-import {
-  TrendingUp,
-  Shield,
-  Users,
-  Coins,
-  Activity,
-  ArrowRight,
-} from 'lucide-react'
-
-// ─── Activity Feed Item ─────────────────────────────────────────────────
+import { Activity } from 'lucide-react'
 
 interface FeedItem {
   id: string
   type: 'batch' | 'claim' | 'register'
   message: string
   timestamp: number
-  value?: string
 }
 
 export default function DashboardPage() {
@@ -49,13 +39,12 @@ export default function DashboardPage() {
     query: { refetchInterval: 10000 },
   })
 
-  // Mock activity feed (would use event logs in production)
+  // Mock activity feed
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
 
   useEffect(() => {
-    // Simulate live feed updates
     const items: FeedItem[] = []
-    if (batchId && batchId > 1n) {
+    if (batchId && batchId > BigInt(1)) {
       for (let i = Number(batchId) - 1; i >= Math.max(1, Number(batchId) - 5); i--) {
         items.push({
           id: `batch-${i}`,
@@ -74,188 +63,145 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 gradient-text">Dashboard</h1>
+    <div className="max-w-7xl mx-auto px-4 py-8 mt-12 animate-fade-in">
+      <h1 className="font-heading italic text-5xl text-white mb-8 tracking-tight">Dashboard</h1>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-teal-400" />
-            </div>
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Total Volume</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100 font-mono">{fmt(totalVolume)}</p>
-          <p className="text-xs text-dark-500 mt-1">USDC traded</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.02] duration-300">
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4">Total Volume</span>
+          <p className="font-heading italic text-4xl text-white mb-1">
+            {fmt(totalVolume)} <span className="text-lg font-body text-white/50 not-italic">USDC</span>
+          </p>
+          <p className="text-white/30 font-body text-sm mt-2">Cumulative traded</p>
         </div>
 
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-yellow-400" />
-            </div>
-            <span className="text-xs text-dark-500 uppercase tracking-wider">MEV Captured</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100 font-mono">{fmt(totalMEV)}</p>
-          <p className="text-xs text-dark-500 mt-1">SYLD from surplus</p>
+        <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.02] duration-300 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00ff87]/5 rounded-full blur-2xl -mr-10 -mt-10" />
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4 relative z-10">MEV Captured</span>
+          <p className="font-heading italic text-4xl text-[#00ff87] mb-1 relative z-10">
+            {fmt(totalMEV)} <span className="text-lg font-body text-[#00ff87]/50 not-italic">SYLD</span>
+          </p>
+          <p className="text-[#00ff87]/30 font-body text-sm mt-2 relative z-10">Total protocol surplus</p>
         </div>
 
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <Coins className="w-4 h-4 text-green-400" />
-            </div>
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Distributed</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100 font-mono">{fmt(totalToHolders)}</p>
-          <p className="text-xs text-dark-500 mt-1">SYLD to holders (60%)</p>
+        <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.02] duration-300">
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4">Distributed</span>
+          <p className="font-heading italic text-4xl text-white mb-1">
+            {fmt(totalToHolders as bigint | undefined)} <span className="text-lg font-body text-white/50 not-italic">SYLD</span>
+          </p>
+          <p className="text-white/30 font-body text-sm mt-2">Sent to holders (60%)</p>
         </div>
 
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <Users className="w-4 h-4 text-purple-400" />
-            </div>
-            <span className="text-xs text-dark-500 uppercase tracking-wider">Epoch {currentEpoch?.toString()}</span>
-          </div>
-          <p className="text-2xl font-bold text-dark-100 font-mono">{fmt(epochDeposits)}</p>
-          <p className="text-xs text-dark-500 mt-1">SYLD this epoch | {holderCount?.toString() || '0'} holders</p>
+        <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.02] duration-300">
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4">Current Epoch</span>
+          <p className="font-heading italic text-4xl text-white mb-1">
+            {fmt(epochDeposits)} <span className="text-lg font-body text-white/50 not-italic">SYLD</span>
+          </p>
+          <p className="text-white/30 font-body text-sm mt-2">{holderCount?.toString() || '0'} active holders</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Revenue Flow Diagram */}
-        <div className="lg:col-span-2 glass-card p-6">
-          <h2 className="text-lg font-semibold mb-6 text-dark-100 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-teal-400" />
-            Revenue Flow
-          </h2>
-
-          <div className="relative">
-            {/* SVG Flow Diagram */}
-            <svg viewBox="0 0 800 240" className="w-full h-auto">
-              {/* Background */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: SVG Flow Diagram */}
+        <div className="lg:col-span-2 liquid-glass rounded-3xl p-8 flex flex-col justify-center transition-transform hover:scale-[1.01] duration-300 min-h-[400px]">
+          <h2 className="font-heading italic text-white text-3xl mb-8">Revenue Flow</h2>
+          
+          <div className="relative w-full overflow-x-auto">
+            <svg viewBox="0 0 800 280" className="w-full h-auto min-w-[600px]">
               <defs>
-                <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.05" />
+                <linearGradient id="tealGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(0, 255, 135, 0.15)" />
+                  <stop offset="100%" stopColor="rgba(0, 255, 135, 0.02)" />
                 </linearGradient>
-                <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#14b8a6" />
-                  <stop offset="100%" stopColor="#2dd4bf" />
+                <linearGradient id="arrowTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(0, 255, 135, 0.5)" />
+                  <stop offset="100%" stopColor="rgba(0, 255, 135, 1)" />
                 </linearGradient>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
               </defs>
 
-              {/* BatchDEX Box */}
-              <rect x="20" y="80" width="160" height="80" rx="12" fill="url(#tealGrad)" stroke="#14b8a6" strokeWidth="1.5" />
-              <text x="100" y="112" textAnchor="middle" fill="#14b8a6" fontSize="14" fontWeight="bold">BatchDEX</text>
-              <text x="100" y="132" textAnchor="middle" fill="#64748b" fontSize="11">Batch Auction</text>
+              {/* BatchDEX */}
+              <rect x="20" y="100" width="160" height="80" rx="16" fill="url(#tealGradDark)" stroke="#00ff87" strokeWidth="1" strokeOpacity="0.5" />
+              <text x="100" y="135" textAnchor="middle" fill="#fff" fontFamily="Instrument Serif" fontStyle="italic" fontSize="22">BatchDEX</text>
+              <text x="100" y="155" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontFamily="Barlow" fontSize="12" letterSpacing="1">BATCH AUCTION</text>
 
-              {/* Arrow 1 */}
-              <line x1="180" y1="120" x2="270" y2="120" stroke="url(#arrowGrad)" strokeWidth="2" />
-              <polygon points="270,115 280,120 270,125" fill="#14b8a6" />
-              <text x="225" y="108" textAnchor="middle" fill="#94a3b8" fontSize="10">MEV Surplus</text>
+              {/* Arrow to Router */}
+              <line x1="180" y1="140" x2="280" y2="140" stroke="url(#arrowTeal)" strokeWidth="2" strokeDasharray="4 4" className="animate-[dash_20s_linear_infinite]" />
+              <polygon points="280,135 290,140 280,145" fill="#00ff87" />
+              <text x="235" y="125" textAnchor="middle" fill="#00ff87" fontFamily="Barlow" fontSize="11" letterSpacing="1" opacity="0.8">MEV SURPLUS</text>
 
-              {/* RevenueRouter Box */}
-              <rect x="280" y="80" width="160" height="80" rx="12" fill="url(#tealGrad)" stroke="#14b8a6" strokeWidth="1.5" />
-              <text x="360" y="112" textAnchor="middle" fill="#14b8a6" fontSize="14" fontWeight="bold">Revenue</text>
-              <text x="360" y="132" textAnchor="middle" fill="#64748b" fontSize="11">Router</text>
+              {/* Revenue Router */}
+              <rect x="300" y="100" width="160" height="80" rx="16" fill="url(#tealGradDark)" stroke="#00ff87" strokeWidth="1" strokeOpacity="0.5" />
+              <text x="380" y="135" textAnchor="middle" fill="#fff" fontFamily="Instrument Serif" fontStyle="italic" fontSize="22">Router</text>
+              <text x="380" y="155" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontFamily="Barlow" fontSize="12" letterSpacing="1">DISTRIBUTION</text>
 
-              {/* Arrow to YieldRegistry (60%) */}
-              <line x1="440" y1="100" x2="540" y2="40" stroke="#22c55e" strokeWidth="2" />
-              <polygon points="535,35 545,38 537,45" fill="#22c55e" />
-              <text x="490" y="60" textAnchor="middle" fill="#22c55e" fontSize="11" fontWeight="bold">60%</text>
+              {/* 60% Yield */}
+              <path d="M 460 120 C 500 120, 520 60, 580 60" fill="none" stroke="#00ff87" strokeWidth="2" />
+              <polygon points="575,55 585,60 575,65" fill="#00ff87" />
+              <rect x="490" y="65" width="40" height="20" rx="4" fill="#00ff87" opacity="0.1" />
+              <text x="510" y="79" textAnchor="middle" fill="#00ff87" fontFamily="Barlow" fontWeight="bold" fontSize="12">60%</text>
 
-              {/* YieldRegistry Box */}
-              <rect x="540" y="10" width="160" height="60" rx="12" fill="rgba(34,197,94,0.1)" stroke="#22c55e" strokeWidth="1.5" />
-              <text x="620" y="35" textAnchor="middle" fill="#22c55e" fontSize="13" fontWeight="bold">.init Holders</text>
-              <text x="620" y="52" textAnchor="middle" fill="#64748b" fontSize="10">YieldRegistry</text>
+              <rect x="585" y="30" width="180" height="60" rx="12" fill="rgba(0,255,135,0.05)" stroke="#00ff87" strokeWidth="1" />
+              <text x="675" y="55" textAnchor="middle" fill="#fff" fontFamily="Instrument Serif" fontStyle="italic" fontSize="20">.init Holders</text>
+              <text x="675" y="70" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontFamily="Barlow" fontSize="10" letterSpacing="1">YIELD REGISTRY</text>
 
-              {/* Arrow to DAO (30%) */}
-              <line x1="440" y1="120" x2="540" y2="120" stroke="#eab308" strokeWidth="2" />
-              <polygon points="540,115 550,120 540,125" fill="#eab308" />
-              <text x="490" y="112" textAnchor="middle" fill="#eab308" fontSize="11" fontWeight="bold">30%</text>
+              {/* 30% DAO */}
+              <path d="M 460 140 L 580 140" fill="none" stroke="#eab308" strokeWidth="2" />
+              <polygon points="575,135 585,140 575,145" fill="#eab308" />
+              <rect x="490" y="120" width="40" height="20" rx="4" fill="#eab308" opacity="0.1" />
+              <text x="510" y="134" textAnchor="middle" fill="#eab308" fontFamily="Barlow" fontWeight="bold" fontSize="12">30%</text>
 
-              {/* DAO Box */}
-              <rect x="550" y="90" width="140" height="60" rx="12" fill="rgba(234,179,8,0.1)" stroke="#eab308" strokeWidth="1.5" />
-              <text x="620" y="118" textAnchor="middle" fill="#eab308" fontSize="13" fontWeight="bold">DAO Treasury</text>
-              <text x="620" y="135" textAnchor="middle" fill="#64748b" fontSize="10">Governance</text>
+              <rect x="585" y="110" width="180" height="60" rx="12" fill="rgba(234,179,8,0.05)" stroke="#eab308" strokeWidth="1" />
+              <text x="675" y="135" textAnchor="middle" fill="#fff" fontFamily="Instrument Serif" fontStyle="italic" fontSize="20">DAO Treasury</text>
+              <text x="675" y="150" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontFamily="Barlow" fontSize="10" letterSpacing="1">GOVERNANCE</text>
 
-              {/* Arrow to Dev (10%) */}
-              <line x1="440" y1="140" x2="540" y2="200" stroke="#a855f7" strokeWidth="2" />
-              <polygon points="535,195 545,198 537,205" fill="#a855f7" />
-              <text x="490" y="180" textAnchor="middle" fill="#a855f7" fontSize="11" fontWeight="bold">10%</text>
+              {/* 10% Dev */}
+              <path d="M 460 160 C 500 160, 520 220, 580 220" fill="none" stroke="#a855f7" strokeWidth="2" />
+              <polygon points="575,215 585,220 575,225" fill="#a855f7" />
+              <rect x="490" y="195" width="40" height="20" rx="4" fill="#a855f7" opacity="0.1" />
+              <text x="510" y="209" textAnchor="middle" fill="#a855f7" fontFamily="Barlow" fontWeight="bold" fontSize="12">10%</text>
 
-              {/* Dev Box */}
-              <rect x="540" y="170" width="140" height="60" rx="12" fill="rgba(168,85,247,0.1)" stroke="#a855f7" strokeWidth="1.5" />
-              <text x="610" y="198" textAnchor="middle" fill="#a855f7" fontSize="13" fontWeight="bold">Dev Fund</text>
-              <text x="610" y="215" textAnchor="middle" fill="#64748b" fontSize="10">Development</text>
+              <rect x="585" y="190" width="180" height="60" rx="12" fill="rgba(168,85,247,0.05)" stroke="#a855f7" strokeWidth="1" />
+              <text x="675" y="215" textAnchor="middle" fill="#fff" fontFamily="Instrument Serif" fontStyle="italic" fontSize="20">Dev Fund</text>
+              <text x="675" y="230" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontFamily="Barlow" fontSize="10" letterSpacing="1">DEVELOPMENT</text>
             </svg>
           </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes dash {
+              to { stroke-dashoffset: -200; }
+            }
+          `}} />
         </div>
 
-        {/* Live Activity Feed */}
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold mb-4 text-dark-100 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-teal-400" />
-            Live Feed
-          </h2>
-
-          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+        {/* Right: Live Feed */}
+        <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.01] duration-300">
+          <h2 className="font-heading italic text-white text-3xl mb-6">Live Feed</h2>
+          <div className="space-y-3">
             {feedItems.length === 0 ? (
-              <div className="text-center py-8 text-dark-500 text-sm">
-                <Activity className="w-8 h-8 mx-auto mb-2 text-dark-600" />
+              <div className="text-center py-12 text-white/30 font-body">
+                <Activity className="w-8 h-8 mx-auto mb-3 opacity-50" />
                 <p>No activity yet.</p>
-                <p className="text-xs mt-1">Place orders and settle batches to see events here.</p>
+                <p className="text-sm mt-1">Place orders to see events here.</p>
               </div>
             ) : (
               feedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-dark-900/40 border border-dark-700/20 hover:border-teal-500/20 transition-all"
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                      item.type === 'batch'
-                        ? 'bg-teal-400'
-                        : item.type === 'claim'
-                        ? 'bg-green-400'
-                        : 'bg-purple-400'
-                    }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-dark-200">{item.message}</p>
-                    <p className="text-xs text-dark-600 mt-0.5">
+                <div key={item.id} className="liquid-glass rounded-xl p-4 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                  <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 animate-pulse ${
+                    item.type === 'batch' ? 'bg-[#00ff87] shadow-[0_0_8px_rgba(0,255,135,0.6)]' : 'bg-white'
+                  }`} />
+                  <div>
+                    <p className="text-white font-body text-sm mb-1">{item.message}</p>
+                    <p className="text-white/30 font-body text-xs">
                       {new Date(item.timestamp).toLocaleTimeString()}
                     </p>
                   </div>
                 </div>
               ))
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Protocol Summary */}
-      <div className="glass-card p-6">
-        <h2 className="text-lg font-semibold mb-4 text-dark-100">Protocol Summary</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Current Batch</p>
-            <p className="text-lg font-bold font-mono text-dark-200">#{batchId?.toString() || '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Current Epoch</p>
-            <p className="text-lg font-bold font-mono text-dark-200">{currentEpoch?.toString() || '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Holder Split</p>
-            <p className="text-lg font-bold font-mono text-green-400">60%</p>
-          </div>
-          <div>
-            <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Batch Window</p>
-            <p className="text-lg font-bold font-mono text-dark-200">10 blocks</p>
           </div>
         </div>
       </div>

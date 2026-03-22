@@ -1,8 +1,22 @@
 import type { Metadata } from 'next'
+import { Instrument_Serif, Barlow } from 'next/font/google'
 import './globals.css'
 import '@initia/interwovenkit-react/styles.css'
 import Providers from './providers'
 import Navbar from '@/components/Navbar'
+
+const instrumentSerif = Instrument_Serif({
+  weight: '400',
+  subsets: ['latin'],
+  style: ['italic', 'normal'],
+  variable: '--font-heading',
+})
+
+const barlow = Barlow({
+  weight: ['300', '400', '500', '600'],
+  subsets: ['latin'],
+  variable: '--font-body',
+})
 
 export const metadata: Metadata = {
   title: 'SocialYield — MEV Yield for .init Holders',
@@ -17,10 +31,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${instrumentSerif.variable} ${barlow.variable} font-body bg-black text-white antialiased`}>
         <Providers>
           <Navbar />
-          <main className="pt-20 min-h-screen">{children}</main>
+          <main className="min-h-screen">{children}</main>
         </Providers>
       </body>
     </html>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, XCircle, Loader2, ExternalLink } from 'lucide-react'
 
 interface TransactionStatusProps {
   hash?: string
@@ -29,86 +28,89 @@ export default function TransactionStatus({
   }, [isPending, isConfirming, isSuccess, error])
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess || error) {
       const timer = setTimeout(() => setVisible(false), 8000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess])
+  }, [isSuccess, error])
 
   if (!visible) return null
 
+  const renderContent = () => {
+    if (isPending || isConfirming) {
+      return (
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+          <div className="flex-1">
+            <p className="text-sm font-body text-white">
+              {isPending ? 'Approve transaction...' : 'Transaction pending...'}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    if (isSuccess) {
+      return (
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#00ff87] shadow-[0_0_8px_rgba(0,255,135,0.6)]" />
+          <div className="flex-1">
+            <p className="text-sm font-body text-white">Transaction confirmed</p>
+            {hash && (
+              <a
+                href={`https://scan.testnet.initia.xyz/tx/${hash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-mono text-[#00ff87] hover:underline block mt-0.5"
+              >
+                {hash.slice(0, 8)}...{hash.slice(-6)}
+              </a>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+          <div className="flex-1 overflow-hidden">
+            <p className="text-sm font-body text-white">{label} failed</p>
+            <p className="text-xs font-body text-white/50 truncate mt-0.5" title={error.message}>
+              {error.message}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm animate-slide-up">
-      <div className="glass-card p-4 shadow-xl">
-        {isPending && (
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-5 h-5 text-teal-400 animate-spin" />
-            <div>
-              <p className="text-sm font-medium text-dark-200">
-                Confirm {label} in wallet...
-              </p>
-            </div>
-          </div>
-        )}
-
-        {isConfirming && (
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-5 h-5 text-teal-400 animate-spin" />
-            <div>
-              <p className="text-sm font-medium text-dark-200">{label} confirming...</p>
-              {hash && (
-                <p className="text-xs text-dark-500 font-mono mt-1">
-                  {hash.slice(0, 10)}...{hash.slice(-8)}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {isSuccess && (
-          <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <div>
-              <p className="text-sm font-medium text-green-400">{label} confirmed!</p>
-              {hash && (
-                <a
-                  href={`https://scan.testnet.initia.xyz/tx/${hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 mt-1"
-                >
-                  View on explorer
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
-            </div>
-            <button
-              onClick={() => setVisible(false)}
-              className="ml-auto text-dark-500 hover:text-dark-300"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className="flex items-center gap-3">
-            <XCircle className="w-5 h-5 text-red-400" />
-            <div>
-              <p className="text-sm font-medium text-red-400">{label} failed</p>
-              <p className="text-xs text-dark-500 mt-1">
-                {error.message?.slice(0, 100)}
-              </p>
-            </div>
-            <button
-              onClick={() => setVisible(false)}
-              className="ml-auto text-dark-500 hover:text-dark-300"
-            >
-              ✕
-            </button>
-          </div>
-        )}
+    <div className="fixed bottom-6 right-6 z-[100] w-80">
+      <div 
+        className="liquid-glass-strong rounded-2xl p-4 shadow-2xl"
+        style={{
+          animation: 'slideInLeft 0.3s ease-out forwards'
+        }}
+      >
+        {renderContent()}
+        <button
+          onClick={() => setVisible(false)}
+          className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
+        >
+          ✕
+        </button>
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes slideInLeft {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}} />
     </div>
   )
 }

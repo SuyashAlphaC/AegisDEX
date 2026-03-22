@@ -5,13 +5,18 @@ import { useInterwovenKit } from '@initia/interwovenkit-react'
 import { useTotalVolume, useTotalMEVCaptured } from '@/hooks/useBatchDEX'
 import { useActiveHolderCount } from '@/hooks/useYieldRegistry'
 import { formatEther } from 'viem'
-import { ArrowRight, Shield, Zap, Users, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, ChevronDown } from 'lucide-react'
+import BlurText from '@/components/BlurText'
+import { useEffect, useState } from 'react'
 
 export default function HomePage() {
   const { openConnect, initiaAddress } = useInterwovenKit()
   const { data: totalVolume } = useTotalVolume()
   const { data: totalMEV } = useTotalMEVCaptured()
   const { data: holderCount } = useActiveHolderCount()
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   const formatBigInt = (v: bigint | undefined) => {
     if (!v) return '0.00'
@@ -21,146 +26,140 @@ export default function HomePage() {
     return num.toFixed(2)
   }
 
+  if (!mounted) return null
+
   return (
-    <div className="relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-teal-500/5 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-teal-600/5 blur-[100px]" />
+    <div className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-center items-center">
+      {/* Background CSS Particle Field */}
+      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
+        {[...Array(25)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-[#00ff87]"
+            style={{
+              width: Math.random() * 3 + 1 + 'px',
+              height: Math.random() * 3 + 1 + 'px',
+              top: Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              opacity: Math.random() * 0.4 + 0.1,
+              animation: `particleFloat ${Math.random() * 15 + 15}s linear infinite`,
+              animationDelay: `-${Math.random() * 20}s`
+            }}
+          />
+        ))}
       </div>
 
-      {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-4 pt-20 pb-32 text-center">
-        <div className="animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-xs font-medium mb-8">
-            <Zap className="w-3.5 h-3.5" />
-            Built on Initia — DeFi Track
+      {/* Main Content */}
+      <div className="relative z-10 text-center px-4 flex flex-col items-center pt-20">
+        {/* Badge */}
+        <div 
+          className="liquid-glass rounded-full px-4 py-1.5 flex items-center gap-2 mb-8 animate-fade-in"
+          style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
+        >
+          <div className="w-2 h-2 rounded-full bg-[#00ff87] animate-pulse" />
+          <span className="text-white/80 font-body text-xs tracking-wider uppercase">Live on Initia Testnet</span>
+        </div>
+
+        {/* Heading */}
+        <BlurText 
+          text="Turn your .init name into yield." 
+          className="text-6xl md:text-7xl lg:text-8xl font-heading italic text-white tracking-tight leading-[0.85] justify-center mb-6 max-w-4xl"
+        />
+
+        {/* Subtext */}
+        <p 
+          className="text-white/50 font-body font-light text-lg max-w-xl mx-auto mb-12 animate-fade-in"
+          style={{ animationDelay: '0.8s', animationFillMode: 'both' }}
+        >
+          SocialYield is a batch-auction DEX on Initia where every trade captures MEV — and redistributes it to .init name holders every epoch.
+        </p>
+
+        {/* Live Stats Bar */}
+        <div 
+          className="liquid-glass rounded-2xl inline-flex flex-wrap justify-center gap-x-12 gap-y-6 px-8 py-4 mb-16 animate-fade-in"
+          style={{ animationDelay: '1.1s', animationFillMode: 'both' }}
+        >
+          <div className="flex flex-col items-center">
+            <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">Total Volume</span>
+            <span className="font-heading italic text-[#00ff87] text-3xl">{formatBigInt(totalVolume)}</span>
           </div>
-
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-            Turn your{' '}
-            <span className="gradient-text">.init name</span>
-            <br />
-            into yield
-          </h1>
-
-          <p className="text-lg md:text-xl text-dark-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            SocialYield is a batch-auction DEX where{' '}
-            <span className="text-teal-400 font-semibold">100% of MEV</span>{' '}
-            goes to .init name holders. No front-running. No sandwich attacks.
-            Just fair trades and passive income.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            {initiaAddress ? (
-              <Link href="/trade" className="btn-primary text-base px-8 py-3 flex items-center gap-2">
-                Go to App <ArrowRight className="w-4 h-4" />
-              </Link>
-            ) : (
-              <button
-                onClick={() => openConnect?.()}
-                className="btn-primary text-base px-8 py-3 flex items-center gap-2"
-              >
-                Connect Wallet <ArrowRight className="w-4 h-4" />
-              </button>
-            )}
-            <Link href="/dashboard" className="btn-secondary text-base px-8 py-3">
-              View Dashboard
-            </Link>
+          <div className="flex flex-col items-center">
+            <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">MEV Captured</span>
+            <span className="font-heading italic text-[#00ff87] text-3xl">{formatBigInt(totalMEV)}</span>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="stat-card text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-teal-400" />
-                <span className="text-xs text-dark-500 uppercase tracking-wider font-medium">
-                  Total Volume
-                </span>
-              </div>
-              <p className="text-3xl font-bold gradient-text">
-                {formatBigInt(totalVolume)} USDC
-              </p>
-            </div>
-
-            <div className="stat-card text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-teal-400" />
-                <span className="text-xs text-dark-500 uppercase tracking-wider font-medium">
-                  MEV Captured
-                </span>
-              </div>
-              <p className="text-3xl font-bold gradient-text">
-                {formatBigInt(totalMEV)} SYLD
-              </p>
-            </div>
-
-            <div className="stat-card text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Users className="w-4 h-4 text-teal-400" />
-                <span className="text-xs text-dark-500 uppercase tracking-wider font-medium">
-                  Active Holders
-                </span>
-              </div>
-              <p className="text-3xl font-bold gradient-text">
-                {holderCount?.toString() || '0'}
-              </p>
-            </div>
+          <div className="flex flex-col items-center">
+            <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">Active Holders</span>
+            <span className="font-heading italic text-[#00ff87] text-3xl">{holderCount?.toString() || '0'}</span>
           </div>
         </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="max-w-6xl mx-auto px-4 pb-32">
-        <h2 className="text-3xl font-bold text-center mb-16 gradient-text">How It Works</h2>
+        {/* CTA Buttons */}
+        <div 
+          className="flex flex-col sm:flex-row items-center gap-6 animate-fade-in"
+          style={{ animationDelay: '1.3s', animationFillMode: 'both' }}
+        >
+          {initiaAddress ? (
+            <Link 
+              href="/trade" 
+              className="liquid-glass-strong rounded-full px-8 py-4 border border-[#00ff87] flex items-center gap-2 text-white font-body font-medium transition-transform hover:scale-105"
+            >
+              Start Trading <ArrowUpRight className="w-5 h-5 text-[#00ff87]" />
+            </Link>
+          ) : (
+            <button 
+              onClick={() => openConnect?.()}
+              className="liquid-glass-strong rounded-full px-8 py-4 border border-[#00ff87] flex items-center gap-2 text-white font-body font-medium transition-transform hover:scale-105"
+            >
+              Start Trading <ArrowUpRight className="w-5 h-5 text-[#00ff87]" />
+            </button>
+          )}
+
+          <a href="#how-it-works" className="text-white/60 font-body text-sm hover:text-white transition-colors flex items-center gap-1 group">
+            Learn How It Works <ChevronDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+          </a>
+        </div>
+      </div>
+
+      {/* How It Works Section (Below Fold) */}
+      <section id="how-it-works" className="relative z-10 w-full max-w-7xl mx-auto px-4 py-32 mt-32 border-t border-white/5">
+        <h2 className="font-heading italic text-5xl text-center text-white mb-16 tracking-tight">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               step: '01',
               title: 'Batch Orders',
               desc: 'All buy and sell orders are collected into a batch over a 10-block window. No order has positional advantage.',
-              icon: ArrowRight,
             },
             {
               step: '02',
               title: 'Uniform Clearing',
               desc: 'A single clearing price is computed at the intersection of demand and supply curves. Everyone gets the same fair price.',
-              icon: Shield,
             },
             {
               step: '03',
               title: 'MEV → Yield',
               desc: 'The surplus between limit prices and clearing price is captured as MEV and redistributed to .init name holders every epoch.',
-              icon: Zap,
             },
-          ].map(({ step, title, desc, icon: Icon }) => (
-            <div key={step} className="glass-card glass-card-hover p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-teal-500 font-mono text-sm font-bold">{step}</span>
-                <Icon className="w-5 h-5 text-teal-400" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-dark-100">{title}</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">{desc}</p>
+          ].map(({ step, title, desc }) => (
+            <div key={step} className="liquid-glass rounded-3xl p-8 transition-transform hover:scale-[1.02] duration-300">
+              <span className="font-heading italic text-3xl text-[#00ff87] mb-4 block opacity-80">{step}</span>
+              <h3 className="font-heading italic text-2xl text-white mb-3">{title}</h3>
+              <p className="font-body text-white/50 leading-relaxed text-sm">
+                {desc}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-4xl mx-auto px-4 pb-32 text-center">
-        <div className="glass-card p-12">
-          <h2 className="text-3xl font-bold mb-4 gradient-text">
-            Own a .init name? Start earning now.
-          </h2>
-          <p className="text-dark-400 mb-8 max-w-lg mx-auto">
-            Register your .init name on the Earn page and start receiving your share
-            of MEV yield every epoch. No staking, no lockup, no minimum.
-          </p>
-          <Link href="/earn" className="btn-primary text-base px-8 py-3 inline-flex items-center gap-2">
-            Start Earning <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
+      {/* Global CSS for particle float animation */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes particleFloat {
+          0% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-100px) translateX(20px); }
+          100% { transform: translateY(-200px) translateX(-20px); opacity: 0; }
+        }
+      `}} />
     </div>
   )
 }

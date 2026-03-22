@@ -4,13 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
 import { shortenAddress } from '@/hooks/useInitiaUsernames'
-import { Waves, ArrowLeftRight, Coins, LayoutDashboard, Wallet } from 'lucide-react'
-
-const navLinks = [
-  { href: '/trade', label: 'Trade', icon: ArrowLeftRight },
-  { href: '/earn', label: 'Earn', icon: Coins },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-]
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -19,84 +12,67 @@ export default function Navbar() {
   const displayName = username || (initiaAddress ? shortenAddress(initiaAddress) : '')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-dark-700/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-teal-500/20 transition-all">
-              <Waves className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold gradient-text">SocialYield</span>
-          </Link>
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-full max-w-7xl px-4 z-50">
+      <div className="flex items-center justify-between">
+        {/* Left: Logo */}
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#00ff87]">
+            <path d="M2 12C2 12 5 4 12 4C19 4 22 12 22 12C22 12 19 20 12 20C5 20 2 12 2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+          <span className="font-heading italic text-white text-xl tracking-tight">SocialYield</span>
+        </Link>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map(({ href, label, icon: Icon }) => {
-              const isActive = pathname === href
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
-                      : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800/50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </Link>
-              )
-            })}
-          </div>
-
-          {/* Wallet Section */}
-          <div className="flex items-center gap-2">
-            {initiaAddress ? (
-              <>
-                <button
-                  onClick={() => openBridge?.({ srcChainId: 'initiation-2', srcDenom: 'uinit' })}
-                  className="btn-secondary text-xs px-3 py-2 hidden sm:block"
-                >
-                  Bridge
-                </button>
-                <button
-                  onClick={() => openWallet?.()}
-                  className="flex items-center gap-2 btn-secondary text-xs px-3 py-2"
-                >
-                  <Wallet className="w-3.5 h-3.5" />
-                  <span className="gradient-text font-semibold">{displayName}</span>
-                </button>
-              </>
-            ) : (
-              <button onClick={() => openConnect?.()} className="btn-primary text-sm px-4 py-2">
-                Connect Wallet
-              </button>
-            )}
-          </div>
+        {/* Center: Nav Links */}
+        <div className="hidden md:flex items-center justify-center liquid-glass rounded-full px-2 py-1.5">
+          {[
+            { name: 'Trade', path: '/trade' },
+            { name: 'Earn', path: '/earn' },
+            { name: 'Dashboard', path: '/dashboard' }
+          ].map((link) => {
+            const isActive = pathname === link.path
+            return (
+              <Link 
+                key={link.name} 
+                href={link.path}
+                className={`rounded-full px-5 py-2 text-sm font-body transition-colors ${
+                  isActive 
+                    ? 'bg-white/10 text-white' 
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {link.name}
+              </Link>
+            )
+          })}
         </div>
-      </div>
 
-      {/* Mobile Nav */}
-      <div className="md:hidden border-t border-dark-700/50 px-4 py-2 flex gap-1">
-        {navLinks.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                isActive
-                  ? 'bg-teal-500/10 text-teal-400'
-                  : 'text-dark-400 hover:text-dark-200'
-              }`}
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3 shrink-0">
+          {initiaAddress ? (
+            <>
+              <button 
+                onClick={() => openBridge?.({ srcChainId: 'initiation-2', srcDenom: 'uinit' })}
+                className="liquid-glass rounded-full px-4 py-2 text-sm font-body text-white hover:bg-white/5 transition-colors hidden sm:block"
+              >
+                Bridge
+              </button>
+              <button 
+                onClick={() => openWallet?.()}
+                className="liquid-glass-teal rounded-full px-4 py-2 text-sm font-body text-[#00ff87] hover:scale-105 transition-transform"
+              >
+                {displayName}
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => openConnect?.()} 
+              className="bg-[#00ff87] text-black rounded-full px-5 py-2 text-sm font-body font-medium hover:scale-105 transition-transform"
             >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </Link>
-          )
-        })}
+              Connect Wallet
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   )
