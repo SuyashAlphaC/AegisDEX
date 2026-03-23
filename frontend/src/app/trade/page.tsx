@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { formatEther } from 'viem'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
 import {
@@ -83,7 +84,12 @@ export default function TradePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 mt-12">
+    <motion.div 
+      initial={{ filter: 'blur(10px)', opacity: 0 }}
+      animate={{ filter: 'blur(0px)', opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="max-w-7xl mx-auto px-4 py-8 mt-12"
+    >
       <h1 className="font-heading italic text-5xl text-white mb-8 tracking-tight">Trade</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -94,22 +100,30 @@ export default function TradePage() {
               className="absolute inset-y-1 w-[calc(50%-4px)] bg-[#00ff87] rounded-full transition-transform duration-300 ease-out"
               style={{ transform: isBuyMode ? 'translateX(4px)' : 'translateX(calc(100% + 4px))' }}
             />
-            <button
-              onClick={() => setIsBuyMode(true)}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault()
+                setIsBuyMode(true)
+              }}
               className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${
                 isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
               }`}
             >
               Buy
-            </button>
-            <button
-              onClick={() => setIsBuyMode(false)}
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault()
+                setIsBuyMode(false)
+              }}
               className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${
                 !isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
               }`}
             >
               Sell
-            </button>
+            </motion.button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -150,8 +164,9 @@ export default function TradePage() {
               </span>
             </div>
 
-            <button
+            <motion.button
               type="submit"
+              whileTap={{ scale: 0.98 }}
               disabled={!limitPrice || !amount || buyOrder.isPending || sellOrder.isPending}
               className="w-full liquid-glass-teal rounded-2xl py-4 font-body font-medium text-white text-base transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
             >
@@ -160,7 +175,7 @@ export default function TradePage() {
                 : isBuyMode
                 ? 'Place Buy Order'
                 : 'Place Sell Order'}
-            </button>
+            </motion.button>
           </form>
         </div>
 
@@ -178,13 +193,14 @@ export default function TradePage() {
                   </span>
                 </div>
               </h2>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={() => settleBatchHook.settle()}
                 disabled={!isSettleable || settleBatchHook.isPending}
                 className="liquid-glass-teal rounded-2xl px-6 py-2.5 font-body text-sm font-medium text-white transition-all hover:scale-105 disabled:opacity-30 disabled:hover:scale-100"
               >
                 {settleBatchHook.isPending ? 'Settling...' : 'Settle Batch'}
-              </button>
+              </motion.button>
             </div>
 
             {/* Progress */}
@@ -309,6 +325,6 @@ export default function TradePage() {
           label="Batch Settlement"
         />
       )}
-    </div>
+    </motion.div>
   )
 }

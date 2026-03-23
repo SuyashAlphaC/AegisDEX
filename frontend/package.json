@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@initia/icons-react": "^2.1.0",
-    "@initia/interwovenkit-react": "^2.4.6",
+    "@initia/interwovenkit-react": "2.4.5",
     "@initia/utils": "^0.1.0",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
@@ -19,6 +19,7 @@
     "bech32": "^1.1.4",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
+    "hls.js": "^1.6.15",
     "lucide-react": "^0.460.0",
     "next": "14.2.15",
     "react": "^18.3.1",

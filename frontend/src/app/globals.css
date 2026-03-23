@@ -8,6 +8,8 @@
     --foreground: 0 0% 100%;
     --primary: 158 100% 53%; /* #00ff87 */
     --primary-foreground: 0 0% 0%;
+    --border: 0 0% 100% / 0.15;
+    --liquid-white: rgba(255, 255, 255, 0.01);
     
     --font-heading: 'Instrument Serif', serif;
     --font-body: 'Barlow', sans-serif;
@@ -23,11 +25,11 @@
 
 @layer components {
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--liquid-white);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-blend-mode: luminosity;
     border: none;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
     position: relative;
     overflow: hidden;
   }
@@ -37,10 +39,8 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(180deg,
-      rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 30%,
-      rgba(0,255,135,0.1) 60%, rgba(255,255,255,0.3) 100%);
+    padding: 1.4px;
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -48,13 +48,14 @@
   }
 
   .liquid-glass-teal {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--liquid-white);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-blend-mode: luminosity;
     border: none;
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 1px rgba(0,255,135,0.15), 0 0 30px rgba(0,255,135,0.05);
+    box-shadow: inset 0 1px 1px rgba(0,255,135,0.15), 0 0 30px rgba(0,255,135,0.05); /* keep outer glow */
   }
 
   .liquid-glass-teal::before {
@@ -62,10 +63,8 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(180deg,
-      rgba(0,255,135,0.4) 0%, rgba(255,255,255,0.08) 30%,
-      rgba(0,255,135,0.1) 60%, rgba(0,255,135,0.4) 100%);
+    padding: 1.4px;
+    background: linear-gradient(180deg, rgba(0,255,135,1) 0%, rgba(0,255,135,0) 50%, rgba(0,255,135,1) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -73,13 +72,13 @@
   }
 
   .liquid-glass-strong {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--liquid-white);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
+    background-blend-mode: luminosity;
     border: none;
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 4px 4px 24px rgba(0,0,0,0.3);
   }
 
   .liquid-glass-strong::before {
@@ -87,10 +86,8 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(180deg,
-      rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 30%,
-      rgba(0,255,135,0.1) 60%, rgba(255,255,255,0.3) 100%);
+    padding: 1.4px;
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;

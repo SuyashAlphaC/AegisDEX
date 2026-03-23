@@ -4,6 +4,7 @@ import './globals.css'
 import '@initia/interwovenkit-react/styles.css'
 import Providers from './providers'
 import Navbar from '@/components/Navbar'
+import BackgroundVideo from '@/components/BackgroundVideo'
 
 const instrumentSerif = Instrument_Serif({
   weight: '400',
@@ -33,8 +34,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${instrumentSerif.variable} ${barlow.variable} font-body bg-black text-white antialiased`}>
         <Providers>
+          <BackgroundVideo />
           <Navbar />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen relative z-10">{children}</main>
         </Providers>
       </body>
     </html>
