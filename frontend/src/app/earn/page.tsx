@@ -20,6 +20,30 @@ import { useUsername, shortenAddress } from '@/hooks/useInitiaUsernames'
 import TransactionStatus from '@/components/TransactionStatus'
 import { ArrowUpRight } from 'lucide-react'
 
+function HolderRow({ address, index }: { address: string; index: number }) {
+  const { username, isLoading } = useUsername(address)
+  
+  return (
+    <div className="liquid-glass rounded-xl px-5 py-3.5 flex items-center justify-between group hover:bg-white/5 transition-colors">
+      <div className="flex items-center gap-6">
+        <span className="text-white/20 font-body text-sm w-6">{index + 1}</span>
+        {isLoading ? (
+          <div className="w-32 h-6 bg-[#00ff87]/10 rounded animate-pulse" />
+        ) : (
+          <span className="font-heading italic text-[#00ff87] text-xl">
+            {username || shortenAddress(address)}
+          </span>
+        )}
+        <span className="text-white/40 font-mono text-xs hidden sm:block">{shortenAddress(address)}</span>
+      </div>
+      <div className="liquid-glass rounded-full px-3 py-1 flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-[#00ff87] shadow-[0_0_5px_rgba(0,255,135,0.5)]" />
+        <span className="font-body text-[10px] text-[#00ff87] tracking-wider uppercase">Active</span>
+      </div>
+    </div>
+  )
+}
+
 export default function EarnPage() {
   const { address } = useAccount()
   const { initiaAddress, openConnect } = useInterwovenKit()
@@ -233,17 +257,7 @@ export default function EarnPage() {
             </div>
           ) : (
             holderList.slice(0, 50).map((addr: string, i: number) => (
-              <div key={addr} className="liquid-glass rounded-xl px-5 py-3.5 flex items-center justify-between group hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-6">
-                  <span className="text-white/20 font-body text-sm w-6">{i + 1}</span>
-                  <span className="font-heading italic text-[#00ff87] text-xl">name.init</span>
-                  <span className="text-white/40 font-mono text-xs hidden sm:block">{shortenAddress(addr)}</span>
-                </div>
-                <div className="liquid-glass rounded-full px-3 py-1 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#00ff87] shadow-[0_0_5px_rgba(0,255,135,0.5)]" />
-                  <span className="font-body text-[10px] text-[#00ff87] tracking-wider uppercase">Active</span>
-                </div>
-              </div>
+              <HolderRow key={addr} address={addr} index={i} />
             ))
           )}
         </div>

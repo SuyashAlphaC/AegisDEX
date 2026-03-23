@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
 import { shortenAddress } from '@/hooks/useInitiaUsernames'
+import logo from '../public/socialyield.png'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -16,10 +18,14 @@ export default function Navbar() {
       <div className="flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#00ff87]">
-            <path d="M2 12C2 12 5 4 12 4C19 4 22 12 22 12C22 12 19 20 12 20C5 20 2 12 2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-          </svg>
+          <Image 
+            src={logo} 
+            alt="SocialYield Logo" 
+            width={28} 
+            height={28} 
+            className="rounded" 
+            priority
+          />
           <span className="font-heading italic text-white text-xl tracking-tight">SocialYield</span>
         </Link>
 

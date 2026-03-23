@@ -13,8 +13,8 @@ import {
   useCurrentEpoch,
   useEpochDeposits,
 } from '@/hooks/useYieldRegistry'
-import { CONTRACTS, REVENUE_ROUTER_ABI } from '@/lib/contracts'
-import { useReadContract } from 'wagmi'
+import { CONTRACTS, BATCH_DEX_ABI } from '@/lib/contracts'
+import { useReadContract, usePublicClient } from 'wagmi'
 import { Activity } from 'lucide-react'
 
 interface FeedItem {
@@ -32,30 +32,60 @@ export default function DashboardPage() {
   const { data: currentEpoch } = useCurrentEpoch()
   const { data: epochDeposits } = useEpochDeposits()
   const { batchId } = useCurrentBatch()
+  const publicClient = usePublicClient()
   const { data: totalToHolders } = useReadContract({
     address: CONTRACTS.revenueRouter,
-    abi: REVENUE_ROUTER_ABI,
+    abi: [{
+      "inputs": [],
+      "name": "totalToHolders",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    }],
     functionName: 'totalToHolders',
     query: { refetchInterval: 10000 },
   })
 
-  // Mock activity feed
+  // Live activity feed
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
 
   useEffect(() => {
-    const items: FeedItem[] = []
-    if (batchId && batchId > BigInt(1)) {
-      for (let i = Number(batchId) - 1; i >= Math.max(1, Number(batchId) - 5); i--) {
-        items.push({
-          id: `batch-${i}`,
-          type: 'batch',
-          message: `Batch #${i} settled`,
-          timestamp: Date.now() - (Number(batchId) - i) * 60000,
-        })
+    async function fetchFeed() {
+      if (!batchId || batchId <= BigInt(1) || !publicClient) return
+      
+      const lastId = Number(batchId) - 1
+      const count = Math.min(5, lastId)
+      
+      try {
+        const items: FeedItem[] = []
+        for (let i = 0; i < count; i++) {
+          const searchId = BigInt(lastId - i)
+          const batchData = await publicClient.readContract({
+            address: CONTRACTS.batchDEX,
+            abi: BATCH_DEX_ABI,
+            functionName: 'batches',
+            args: [searchId]
+          }) as [bigint, bigint, bigint, bigint, boolean, bigint, bigint, bigint]
+          
+          const endBlock = batchData[2] // endBlock
+          
+          if (endBlock && endBlock > BigInt(0)) {
+            const blockInfo = await publicClient.getBlock({ blockNumber: endBlock })
+            items.push({
+              id: `batch-${searchId}`,
+              type: 'batch',
+              message: `Batch #${searchId} settled`,
+              timestamp: Number(blockInfo.timestamp) * 1000
+            })
+          }
+        }
+        setFeedItems(items)
+      } catch (err) {
+        console.error("Failed to fetch live feed logs", err)
       }
     }
-    setFeedItems(items)
-  }, [batchId])
+    fetchFeed()
+  }, [batchId, publicClient])
 
   const fmt = (v: bigint | undefined) => {
     if (!v) return '0.00'

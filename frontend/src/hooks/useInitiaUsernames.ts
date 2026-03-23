@@ -28,9 +28,15 @@ async function getNameFromAddress(initiaAddress: string): Promise<string | null>
     // The address bytes from bech32 decode are 20 bytes
     // Pad to 32 bytes with leading zeros for Move address format
     
-    const bech32 = await import('bech32')
-    const decoded = bech32.decode(initiaAddress)
-    const bytes20 = new Uint8Array(bech32.fromWords(decoded.words))
+    let bytes20: Uint8Array
+    if (initiaAddress.startsWith('0x')) {
+      const hexString = initiaAddress.slice(2)
+      bytes20 = new Uint8Array(hexString.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+    } else {
+      const bech32 = await import('bech32')
+      const decoded = bech32.decode(initiaAddress)
+      bytes20 = new Uint8Array(bech32.fromWords(decoded.words))
+    }
     
     // Move address is 32 bytes, pad 20-byte address with 12 leading zero bytes
     const bytes32 = new Uint8Array(32)
