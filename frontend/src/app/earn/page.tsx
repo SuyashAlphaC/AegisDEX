@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
@@ -20,13 +21,20 @@ import { useUsername, shortenAddress } from '@/hooks/useInitiaUsernames'
 import TransactionStatus from '@/components/TransactionStatus'
 import { ArrowUpRight } from 'lucide-react'
 
-function HolderRow({ address, index }: { address: string; index: number }) {
+function HolderRow({ address, displayIndex }: { address: string; displayIndex: number }) {
   const { username, isLoading } = useUsername(address)
+  const { data: holderInfo } = useHolderInfo(address as `0x${string}`)
+
+  // If the holder info has loaded and they are not active, hide the row.
+  const isLoaded = !!holderInfo
+  const isActive = isLoaded ? (holderInfo as any).active : true
   
+  if (isLoaded && !isActive) return null
+
   return (
     <div className="liquid-glass rounded-xl px-5 py-3.5 flex items-center justify-between group hover:bg-white/5 transition-colors">
       <div className="flex items-center gap-6">
-        <span className="text-white/20 font-body text-sm w-6">{index + 1}</span>
+        <span className="text-white/20 font-body text-sm w-6">{displayIndex}</span>
         {isLoading ? (
           <div className="w-32 h-6 bg-[#00ff87]/10 rounded animate-pulse" />
         ) : (
@@ -46,7 +54,7 @@ function HolderRow({ address, index }: { address: string; index: number }) {
 
 export default function EarnPage() {
   const { address } = useAccount()
-  const { initiaAddress, openConnect } = useInterwovenKit()
+  const { initiaAddress, username: interwovenUsername, openConnect } = useInterwovenKit()
 
   // Yield Registry state
   const { data: currentEpoch } = useCurrentEpoch()
@@ -58,7 +66,14 @@ export default function EarnPage() {
   const { data: holderList } = useHolderList()
 
   // Username check
-  const { username: initName, hasUsername, isLoading: usernameLoading } = useUsername(initiaAddress)
+  const { username: fetchedName, isLoading: usernameLoading } = useUsername(initiaAddress)
+  const initName = interwovenUsername || fetchedName
+  const hasUsername = !!initName
+
+  console.log('initiaAddress:', initiaAddress)
+  console.log('interwovenUsername:', interwovenUsername) 
+  console.log('fetchedName:', fetchedName)
+  console.log('hasUsername:', hasUsername)
 
   // Write hooks
   const registerHook = useRegister()
@@ -251,13 +266,13 @@ export default function EarnPage() {
       <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.005]">
         <h2 className="font-heading italic text-white text-2xl mb-6 pl-2">Registered Holders</h2>
         <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
-          {!holderList || holderList.length === 0 ? (
+          {!holderCount || holderCount === BigInt(0) ? (
             <div className="text-center text-white/30 font-body py-8">
-              No holders registered yet. Be the first!
+              No holders currently registered. Be the first!
             </div>
           ) : (
-            holderList.slice(0, 50).map((addr: string, i: number) => (
-              <HolderRow key={addr} address={addr} index={i} />
+            holderList?.slice(0, 50).map((addr: string, i: number) => (
+              <HolderRow key={addr} address={addr} displayIndex={i + 1} />
             ))
           )}
         </div>

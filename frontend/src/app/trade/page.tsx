@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { formatEther } from 'viem'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
@@ -66,6 +66,14 @@ export default function TradePage() {
     }
   }
 
+  // Reset form upon successful order confirmation
+  useEffect(() => {
+    if (buyOrder.isSuccess || sellOrder.isSuccess) {
+      setLimitPrice('')
+      setAmount('')
+    }
+  }, [buyOrder.isSuccess, sellOrder.isSuccess])
+
   if (!initiaAddress) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -73,8 +81,8 @@ export default function TradePage() {
         <p className="font-body text-white/50 text-lg mb-8 max-w-md text-center">
           Connect your wallet to participate in the SocialYield batch auctions.
         </p>
-        <button 
-          onClick={() => openConnect?.()} 
+        <button
+          onClick={() => openConnect?.()}
           className="liquid-glass-teal rounded-full px-8 py-4 font-body font-medium text-[#00ff87] hover:scale-105 transition-transform"
         >
           Connect Wallet
@@ -84,7 +92,7 @@ export default function TradePage() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ filter: 'blur(10px)', opacity: 0 }}
       animate={{ filter: 'blur(0px)', opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -96,7 +104,7 @@ export default function TradePage() {
         {/* Left: Order Form */}
         <div className="liquid-glass rounded-3xl p-6 h-fit transition-transform hover:scale-[1.01] duration-300">
           <div className="flex mb-8 liquid-glass-strong rounded-full p-1 relative">
-            <div 
+            <div
               className="absolute inset-y-1 w-[calc(50%-4px)] bg-[#00ff87] rounded-full transition-transform duration-300 ease-out"
               style={{ transform: isBuyMode ? 'translateX(4px)' : 'translateX(calc(100% + 4px))' }}
             />
@@ -106,9 +114,8 @@ export default function TradePage() {
                 e.preventDefault()
                 setIsBuyMode(true)
               }}
-              className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${
-                isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
-              }`}
+              className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
+                }`}
             >
               Buy
             </motion.button>
@@ -118,9 +125,8 @@ export default function TradePage() {
                 e.preventDefault()
                 setIsBuyMode(false)
               }}
-              className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${
-                !isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
-              }`}
+              className={`relative z-10 flex-1 py-2.5 rounded-full text-sm font-body font-medium transition-colors ${!isBuyMode ? 'text-black' : 'text-white/60 hover:text-white'
+                }`}
             >
               Sell
             </motion.button>
@@ -173,8 +179,8 @@ export default function TradePage() {
               {buyOrder.isPending || sellOrder.isPending
                 ? 'Confirming...'
                 : isBuyMode
-                ? 'Place Buy Order'
-                : 'Place Sell Order'}
+                  ? 'Place Buy Order'
+                  : 'Place Sell Order'}
             </motion.button>
           </form>
         </div>

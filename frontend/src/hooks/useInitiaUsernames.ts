@@ -15,13 +15,9 @@ const nameCache = new Map<string, string | null>()
  * Uses the Initia REST API view function endpoint for the usernames module.
  * See: https://docs.initia.xyz/developers/developer-guides/integrating-initia-apps/usernames
  */
-async function getNameFromAddress(initiaAddress: string): Promise<string | null> {
+export async function getNameFromAddress(initiaAddress: string): Promise<string | null> {
   if (!initiaAddress) return null
-
-  // Check cache first
-  if (nameCache.has(initiaAddress)) {
-    return nameCache.get(initiaAddress) ?? null
-  }
+  if (nameCache.has(initiaAddress)) return nameCache.get(initiaAddress) ?? null
 
   try {
     // Convert bech32 init1... address to 32-byte hex, then base64
@@ -43,37 +39,41 @@ async function getNameFromAddress(initiaAddress: string): Promise<string | null>
     bytes32.set(bytes20, 12)
     
     // Base64 encode the 32 bytes
-    const base64arg = btoa(String.fromCharCode(...Array.from(bytes32)))
-    
+    const encodedArg = btoa(String.fromCharCode(...Array.from(bytes32)))
+
     const response = await fetch(
       `${L1_REST_URL}/initia/move/v1/accounts/${USERNAMES_MODULE}/modules/usernames/view_functions/get_name_from_address`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ args: [base64arg] })
+        body: JSON.stringify({
+          args: [encodedArg],
+          type_args: []
+        })
       }
     )
-    
+
     if (!response.ok) {
       nameCache.set(initiaAddress, null)
       return null
     }
 
     const data = await response.json()
-    
-    // Response is { data: '"name"' } or { data: 'null' }
-    // Or Move Option format: { data: { vec: ["name"] } }
     const raw = data?.data
-    if (!raw) {
-      nameCache.set(initiaAddress, null)
-      return null
-    }
+    if (!raw) { nameCache.set(initiaAddress, null); return null }
 
     let resultName: string | null = null
-
     if (typeof raw === 'string') {
-      const cleaned = raw.replace(/"/g, '').trim()
-      resultName = cleaned === 'null' || cleaned === '' ? null : cleaned
+      // Try parsing as JSON first (handles '"name"' format)
+      try {
+        const parsed = JSON.parse(raw)
+        if (typeof parsed === 'string') resultName = parsed
+        else if (parsed?.vec?.length > 0) resultName = parsed.vec[0]
+        else resultName = null
+      } catch {
+        const cleaned = raw.replace(/"/g, '').trim()
+        resultName = cleaned === 'null' || cleaned === '' ? null : cleaned
+      }
     } else if (raw?.vec?.length > 0) {
       resultName = raw.vec[0]
     }
@@ -90,7 +90,7 @@ async function getNameFromAddress(initiaAddress: string): Promise<string | null>
 /**
  * Resolve a .init username to its Initia address.
  */
-async function getAddressFromName(name: string): Promise<string | null> {
+export async function getAddressFromName(name: string): Promise<string | null> {
   if (!name) return null
 
   try {
