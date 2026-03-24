@@ -93,12 +93,12 @@ SocialYield is a batch-auction DEX appchain on Initia that eliminates front-runn
 
 | Contract             | Address |
 |---------------------|---------|
-| BatchDEX            | `TBD`   |
-| RevenueRouter       | `TBD`   |
-| YieldRegistry       | `TBD`   |
-| GovernanceTimelock   | `TBD`   |
-| USDC (Test)         | `TBD`   |
-| SYLD (Test)         | `TBD`   |
+| BatchDEX            | `0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5`   |
+| RevenueRouter       | `0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A`   |
+| YieldRegistry       | `0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7`   |
+| GovernanceTimelock   | `0xd059B82372B751D12f4641160a5d0b19B166ff63`   |
+| USDC (Test)         | `0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923`   |
+| SYLD (Test)         | `0x9f6292F57EDD679120f540638D7A9CAC2681573F`   |
 
 ## Tech Stack
 
