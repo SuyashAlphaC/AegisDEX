@@ -67,8 +67,7 @@ export default function Providers({ children }: PropsWithChildren) {
       <WagmiProvider config={wagmiConfig}>
         <InterwovenKitProvider
           {...TESTNET}
-          customChain={customChain}
-          customChains={[customChain]}
+          customChain={customChain as any}
           defaultChainId={process.env.NEXT_PUBLIC_ROLLUP_CHAIN_ID!}
         >
           {children}
