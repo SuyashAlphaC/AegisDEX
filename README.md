@@ -1,157 +1,92 @@
-# SocialYield — MEV Yield for .init Holders
+# SocialYield: The Community-First MEV-Aware Appchain
 
-> A batch-auction DEX appchain on Initia where 100% of captured MEV is redistributed to .init name holders every epoch.
-
-**🏆 INITIATE: The Initia Hackathon (Season 1) — DeFi Track**
+**SocialYield** is a sovereign Initia Appchain featuring a specialized Batch-Auction DEX that productizes sequencer revenue. By structurally eliminating front-running and internalizing arbitrage value, SocialYield transforms the **.init name** from a simple identity primitive into a high-yield productive asset.
 
 ---
 
-## Initia Hackathon Submission
+## 🚀 The Core Thesis
 
-- **Project Name**: SocialYield
+On legacy networks, MEV (Maximal Extractable Value) is a "tax" on retail users that flows to bots and validators. **SocialYield changes the equation.**
 
-### Project Overview
+Built on the Initia Interwoven Stack, SocialYield captures 100% of sequencer revenue and "socializes" it. Instead of leaking value, we route it back to the community via a transparent, automated protocol.
 
-SocialYield is a batch-auction DEX appchain on Initia that eliminates front-running by clearing all orders at a uniform price every 10 blocks. 100% of the MEV surplus captured at settlement is redistributed to .init name holders every epoch — turning Initia's identity primitive into a yield-bearing asset.
-
-### Implementation Detail
-
-- **The Custom Implementation**: A uniform-price batch auction clearing engine (`BatchDEX.sol`) that aggregates orders over a configurable block window, computes the intersection of supply and demand curves, settles all trades at one price, and routes captured surplus through a `RevenueRouter` to a permissionless yield pool.
-
-- **The Native Feature**: Initia Usernames (.init). Registration in the `YieldRegistry` requires owning a .init name. The frontend queries the Initia L1 username module to verify ownership before showing the registration button. All holder displays show .init names instead of hex addresses throughout the app.
-
-### How to Run Locally
-
-1. Clone repo:
-   ```bash
-   git clone https://github.com/<YOUR_USERNAME>/socialyield.git
-   cd socialyield
-   ```
-
-2. Build and test contracts:
-   ```bash
-   cd contracts
-   forge install OpenZeppelin/openzeppelin-contracts --no-git
-   forge build
-   forge test -vv
-   ```
-
-3. Deploy (local):
-   ```bash
-   chmod +x ../scripts/deploy.sh
-   ../scripts/deploy.sh local
-   ```
-
-4. Copy deployed addresses to `frontend/.env.local`
-
-5. Run frontend:
-   ```bash
-   cd ../frontend
-   npm install
-   npm run dev
-   ```
-
-6. Open http://localhost:3000, connect wallet, place orders
+### **The Economic Flywheel**
+1. **Trading Volume** generates Sequencer Fees and Arbitrage Surplus.
+2. **Batch Auctions** capture this surplus at the protocol level.
+3. **Revenue Distribution** routes yield to verified **.init name holders**.
+4. **Demand for .init names** increases, bringing more users into the Initia ecosystem.
 
 ---
 
-## Architecture
+## ✨ Unique & Competent Features
 
-```
-┌─────────────────┐        ┌──────────────────┐        ┌──────────────────┐
-│                 │ MEV    │                  │  60%   │                  │
-│    BatchDEX     │───────▶│  RevenueRouter   │───────▶│  YieldRegistry   │
-│  (Batch Auction │ Surplus│  (Split Engine)   │        │  (.init Holders) │
-│   Clearing)     │        │                  │        │  Claim Yield     │
-└─────────────────┘        │                  │        └──────────────────┘
-                           │                  │  30%   ┌──────────────────┐
- Orders collected           │                  │───────▶│  DAO Treasury    │
- every 10 blocks            │                  │        └──────────────────┘
- Uniform price              │                  │  10%   ┌──────────────────┐
- No front-running           │                  │───────▶│  Dev Fund        │
-                           └──────────────────┘        └──────────────────┘
+### 1. Frequent Batch Auctions (FBA) Logic
+Unlike standard XYK AMMs (like Uniswap) that execute trades sequentially, SocialYield’s `BatchDEX.sol` uses a discrete-time execution model:
+* **Anti-Sandwich:** All orders within a 10-block window (approx. 5 seconds) are collected and executed at a **Uniform Clearing Price**.
+* **Coincidence of Wants (CoW):** Orders are matched internally first, reducing slippage and external price impact.
+* **MEV Capture:** Any residual arbitrage value is captured by the sequencer, not external searchers.
 
-                    ┌──────────────────┐
-                    │ GovernanceTimelock│  48h delay on all
-                    │   (Admin Guard)  │  parameter changes
-                    └──────────────────┘
-```
+### 2. .init Staking & Yield Registry
+We have implemented a native **Yield Registry** that bridges Initia's identity layer with DeFi incentives:
+* **Identity-Gated Rewards:** Only users with a registered `.init` username can claim their share of the protocol revenue.
+* **Automated Revenue Split:** All sequencer earnings are routed through `RevenueRouter.sol` with a hardcoded split:
+    * **60%** to .init name holders.
+    * **30%** to the DAO Treasury for liquidity mining.
+    * **10%** for protocol insurance/maintenance.
 
-## Contracts
+### 3. "Invisible Chain" UX
+Leveraging Initia’s native UX primitives, SocialYield feels like a Centralized Exchange:
+* **Session Keys:** Using `InterwovenKit`'s `enableAutoSign`, users approve a single session and trade instantly without wallet popups.
+* **Interwoven Bridge:** Users can deposit assets from any Minitia rollup into the SocialYield Batch window with a single click.
 
-| Contract             | Purpose                                        |
-|---------------------|-------------------------------------------------|
-| `BatchDEX.sol`       | Batch-auction DEX with uniform clearing price   |
-| `RevenueRouter.sol`  | MEV surplus splitter (60/30/10)                 |
-| `YieldRegistry.sol`  | .init holder registry + epoch yield claims      |
-| `GovernanceTimelock.sol` | 48h timelock for admin changes              |
-| `TestToken.sol`      | Mintable ERC20 for testing                      |
+---
 
-## Contract Addresses (Testnet)
+## 🛠 Technical Implementation
 
-> Fill after deployment
+### **Smart Contract Architecture**
+* **`BatchDEX.sol`**: The core execution engine. Manages order state machines and uniform price clearing.
+* **`YieldRegistry.sol`**: Manages the distribution logic and maps rewards to `.init` identities.
+* **`RevenueRouter.sol`**: The protocol's "Lungs"—receives sequencer fees and pumps them into the distribution pools.
+* **`GovernanceTimelock.sol`**: Ensures that the community has a 48-hour window to review any changes to the revenue split.
 
-| Contract             | Address |
-|---------------------|---------|
-| BatchDEX            | `0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5`   |
-| RevenueRouter       | `0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A`   |
-| YieldRegistry       | `0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7`   |
-| GovernanceTimelock   | `0xd059B82372B751D12f4641160a5d0b19B166ff63`   |
-| USDC (Test)         | `0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923`   |
-| SYLD (Test)         | `0x9f6292F57EDD679120f540638D7A9CAC2681573F`   |
+### **Frontend Stack**
+* **Framework**: Next.js 14 + Tailwind CSS.
+* **Identity**: `@initia/interwovenkit-react` for native `.init` username resolution.
+* **Interoperability**: Custom hooks (`useBatchDEX.ts`) for managing cross-chain asset movements via the Interwoven Bridge.
 
-## Tech Stack
+---
 
-- **Contracts**: Solidity 0.8.24 / Foundry / OpenZeppelin
-- **Frontend**: Next.js 14 / TypeScript / Tailwind CSS
-- **Web3**: wagmi / viem / InterwovenKit
-- **Chain**: Initia EVM Appchain (minievm)
+## 🏗 Setup & Deployment
 
-## Key Features
+### **Prerequisites**
+* [Initia Weave CLI](https://docs.initia.xyz)
+* Foundry (for contract testing)
+* Node.js (v20+)
 
-1. **Fair Batch Auctions** — All orders in a batch get the same clearing price. No MEV extraction by position.
-2. **MEV → Yield** — 100% of surplus between limit prices and clearing price is captured and redistributed.
-3. **Identity-Gated Yield** — Only .init name holders can register for yield, making Initia's identity layer economically meaningful.
-4. **Permissionless Settlement** — Anyone can call `settleBatch()` after the window elapses.
-5. **Governance Guarded** — A 48h timelock protects all admin parameter changes.
-
-## Development
-
-### Prerequisites
-
-- [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- [Node.js 18+](https://nodejs.org/)
-- [Initia CLI tools](https://docs.initia.xyz/hackathon/get-started) (for deployment)
-
-### Quick Start
-
+### **Appchain Orchestration**
 ```bash
-# Contracts
-cd contracts
-forge build          # Compile
-forge test -vv       # Run tests
+# Initialize the SocialYield Minitia rollup
+weave init socialyield-chain
 
-# Frontend
+# Deploy core contracts to the local/testnet Minitia
+sh scripts/deploy.sh
+```
+
+### **Frontend Setup**
+```bash
 cd frontend
 npm install
-npm run dev          # Start dev server
+npm run dev
 ```
 
-### Deployment
+---
 
-```bash
-# Set up env
-cp contracts/.env.example contracts/.env
-# Edit contracts/.env with your keys
+## 🏆 Why SocialYield Wins
+SocialYield is the **only** submission that treats the **Appchain as a Business**. While others build DApps on top of chains, we have built a sovereign economy that:
+1.  **Directly utilizes the "Keep the Revenue" rule** of Initia.
+2.  **Solves the MEV problem** at the infrastructure layer.
+3.  **Aggressively promotes the .init identity**, driving ecosystem-wide growth.
 
-# Deploy
-./scripts/deploy.sh local    # Local
-./scripts/deploy.sh testnet  # Testnet
+---
 
-# Smoke test
-./scripts/smoke-test.sh
-```
-
-## License
-
-MIT
+**Build the app. Keep the revenue. Share it with the community.** *SocialYield — Powered by Initia.*
