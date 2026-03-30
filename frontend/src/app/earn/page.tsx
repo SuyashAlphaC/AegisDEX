@@ -87,7 +87,7 @@ export default function EarnPage() {
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <h1 className="font-heading italic text-6xl text-white mb-6 tracking-tight">Earn</h1>
         <p className="font-body text-white/50 text-lg mb-8 max-w-md text-center">
-          Connect your wallet to register your .init name and start earning passive MEV yield.
+          Connect your wallet to register your .init name and start earning passive surplus yield.
         </p>
         <button 
           onClick={() => openConnect?.()} 
@@ -174,7 +174,7 @@ export default function EarnPage() {
               <div>
                 <h3 className="font-heading italic text-white text-3xl mb-3">You qualify for yield.</h3>
                 <p className="font-body text-white/50 leading-relaxed">
-                  Your .init name <span className="text-[#00ff87]">{initName}</span> makes you eligible to earn MEV yield every epoch.
+                  Your .init name <span className="text-[#00ff87]">{initName}</span> makes you eligible to earn surplus yield every epoch.
                 </p>
               </div>
               <button

@@ -53,7 +53,7 @@ export default function HomePage() {
           className="text-white/50 font-body font-light text-lg max-w-xl mx-auto mb-12 animate-fade-in"
           style={{ animationDelay: '0.8s', animationFillMode: 'both' }}
         >
-          SocialYield is a batch-auction DEX on Initia where every trade captures MEV — and redistributes it to .init name holders every epoch.
+          SocialYield is a batch-auction DEX on Initia where every trade captures order surplus — and redistributes it to .init name holders every epoch.
         </p>
 
         {/* Live Stats Bar */}
@@ -66,7 +66,7 @@ export default function HomePage() {
             <CountUp value={parseFloat(formatBigInt(totalVolume))} decimals={2} className="font-heading italic text-[#00ff87] text-3xl" />
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">MEV Captured</span>
+            <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">Surplus Captured</span>
             <CountUp value={parseFloat(formatBigInt(totalMEV))} decimals={2} className="font-heading italic text-[#00ff87] text-3xl" />
           </div>
           <div className="flex flex-col items-center">
@@ -119,8 +119,8 @@ export default function HomePage() {
             },
             {
               step: '03',
-              title: 'MEV → Yield',
-              desc: 'The surplus between limit prices and clearing price is captured as MEV and redistributed to .init name holders every epoch.',
+              title: 'Surplus → Yield',
+              desc: 'The surplus between limit prices and clearing price is captured as order surplus and redistributed to .init name holders every epoch.',
             },
           ].map(({ step, title, desc }) => (
             <div key={step} className="liquid-glass rounded-3xl p-8 transition-transform hover:scale-[1.02] duration-300">

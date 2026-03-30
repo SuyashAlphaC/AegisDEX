@@ -281,7 +281,7 @@ export default function DashboardPage() {
 
         <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.02] duration-300 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#00ff87]/5 rounded-full blur-2xl -mr-10 -mt-10" />
-          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4 relative z-10">MEV Captured</span>
+          <span className="text-white/40 font-body text-xs uppercase tracking-widest block mb-4 relative z-10">Surplus Captured</span>
           <p className="font-heading italic text-4xl text-[#00ff87] mb-1 relative z-10">
             <CountUp value={fmtNum(totalMEV)} decimals={2} className="text-[#00ff87]" /> <span className="text-lg font-body text-[#00ff87]/50 not-italic">SYLD</span>
           </p>
@@ -329,7 +329,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* MEV per Batch — Area Chart */}
         <div className="liquid-glass rounded-3xl p-6 transition-transform hover:scale-[1.01] duration-300">
-          <h3 className="font-heading italic text-white text-2xl mb-6">MEV per Batch</h3>
+          <h3 className="font-heading italic text-white text-2xl mb-6">Surplus per Batch</h3>
           {mevChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={mevChartData}>
@@ -359,7 +359,7 @@ export default function DashboardPage() {
                     color: '#fff',
                     fontSize: '13px',
                   }}
-                  formatter={(value: number) => [`${value.toFixed(4)} SYLD`, 'MEV']}
+                  formatter={(value: number) => [`${value.toFixed(4)} SYLD`, 'Surplus']}
                 />
                 <Area
                   type="monotone"
@@ -452,7 +452,7 @@ export default function DashboardPage() {
               {/* Arrow to Router */}
               <line x1="180" y1="140" x2="280" y2="140" stroke="url(#arrowTeal)" strokeWidth="2" strokeDasharray="4 4" className="animate-[dash_20s_linear_infinite]" />
               <polygon points="280,135 290,140 280,145" fill="#00ff87" />
-              <text x="235" y="125" textAnchor="middle" fill="#00ff87" fontFamily="Barlow" fontSize="11" letterSpacing="1" opacity="0.8">MEV SURPLUS</text>
+              <text x="235" y="125" textAnchor="middle" fill="#00ff87" fontFamily="Barlow" fontSize="11" letterSpacing="1" opacity="0.8">ORDER SURPLUS</text>
 
               {/* Revenue Router */}
               <rect x="300" y="100" width="160" height="80" rx="16" fill="url(#tealGradDark)" stroke="#00ff87" strokeWidth="1" strokeOpacity="0.5" />

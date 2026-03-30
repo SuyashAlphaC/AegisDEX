@@ -20,9 +20,9 @@ const barlow = Barlow({
 })
 
 export const metadata: Metadata = {
-  title: 'SocialYield — MEV Yield for .init Holders',
+  title: 'SocialYield — Order Surplus Yield for .init Holders',
   description:
-    'A batch-auction DEX appchain on Initia where 100% of captured MEV is redistributed to .init name holders every epoch.',
+    'A batch-auction DEX appchain on Initia where 100% of captured order surplus is redistributed to .init name holders every epoch.',
 }
 
 export default function RootLayout({
