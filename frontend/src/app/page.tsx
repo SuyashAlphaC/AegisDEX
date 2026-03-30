@@ -7,6 +7,7 @@ import { useActiveHolderCount } from '@/hooks/useYieldRegistry'
 import { formatEther } from 'viem'
 import { ArrowUpRight, ChevronDown } from 'lucide-react'
 import BlurText from '@/components/BlurText'
+import CountUp from '@/components/CountUp'
 import { useEffect, useState } from 'react'
 
 export default function HomePage() {
@@ -29,26 +30,7 @@ export default function HomePage() {
   if (!mounted) return null
 
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-center items-center">
-      {/* Background CSS Particle Field */}
-      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
-        {[...Array(25)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-[#00ff87]"
-            style={{
-              width: Math.random() * 3 + 1 + 'px',
-              height: Math.random() * 3 + 1 + 'px',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%',
-              opacity: Math.random() * 0.4 + 0.1,
-              animation: `particleFloat ${Math.random() * 15 + 15}s linear infinite`,
-              animationDelay: `-${Math.random() * 20}s`
-            }}
-          />
-        ))}
-      </div>
-
+    <div className="relative min-h-screen overflow-hidden flex flex-col justify-center items-center">
       {/* Main Content */}
       <div className="relative z-10 text-center px-4 flex flex-col items-center pt-20">
         {/* Badge */}
@@ -81,15 +63,15 @@ export default function HomePage() {
         >
           <div className="flex flex-col items-center">
             <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">Total Volume</span>
-            <span className="font-heading italic text-[#00ff87] text-3xl">{formatBigInt(totalVolume)}</span>
+            <CountUp value={parseFloat(formatBigInt(totalVolume))} decimals={2} className="font-heading italic text-[#00ff87] text-3xl" />
           </div>
           <div className="flex flex-col items-center">
             <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">MEV Captured</span>
-            <span className="font-heading italic text-[#00ff87] text-3xl">{formatBigInt(totalMEV)}</span>
+            <CountUp value={parseFloat(formatBigInt(totalMEV))} decimals={2} className="font-heading italic text-[#00ff87] text-3xl" />
           </div>
           <div className="flex flex-col items-center">
             <span className="text-white/40 font-body text-xs uppercase tracking-widest mb-1">Active Holders</span>
-            <span className="font-heading italic text-[#00ff87] text-3xl">{holderCount?.toString() || '0'}</span>
+            <CountUp value={Number(holderCount || 0)} decimals={0} className="font-heading italic text-[#00ff87] text-3xl" />
           </div>
         </div>
 
@@ -152,14 +134,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Global CSS for particle float animation */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes particleFloat {
-          0% { transform: translateY(0) translateX(0); }
-          50% { transform: translateY(-100px) translateX(20px); }
-          100% { transform: translateY(-200px) translateX(-20px); opacity: 0; }
-        }
-      `}} />
     </div>
   )
 }

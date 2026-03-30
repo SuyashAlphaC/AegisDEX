@@ -16,12 +16,12 @@
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
-| **BatchDEX** | `0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5` | [View ↗](https://scan.testnet.initia.xyz/address/0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5) |
-| **YieldRegistry** | `0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7` | [View ↗](https://scan.testnet.initia.xyz/address/0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7) |
-| **RevenueRouter** | `0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A` | [View ↗](https://scan.testnet.initia.xyz/address/0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A) |
-| **GovernanceTimelock** | `0xd059B82372B751D12f4641160a5d0b19B166ff63` | [View ↗](https://scan.testnet.initia.xyz/address/0xd059B82372B751D12f4641160a5d0b19B166ff63) |
-| **USDC (Test)** | `0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923` | [View ↗](https://scan.testnet.initia.xyz/address/0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923) |
-| **SYLD (Test)** | `0x9f6292F57EDD679120f540638D7A9CAC2681573F` | [View ↗](https://scan.testnet.initia.xyz/address/0x9f6292F57EDD679120f540638D7A9CAC2681573F) |
+| **BatchDEX** | `0xbbD6525b878deB33188077B35f29B708d28B0C88` | [View ↗](https://scan.testnet.initia.xyz/address/0xbbD6525b878deB33188077B35f29B708d28B0C88) |
+| **YieldRegistry** | `0xc37F0d3f439FBA4E5b134271BA910ab544BE466f` | [View ↗](https://scan.testnet.initia.xyz/address/0xc37F0d3f439FBA4E5b134271BA910ab544BE466f) |
+| **RevenueRouter** | `0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83` | [View ↗](https://scan.testnet.initia.xyz/address/0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83) |
+| **GovernanceTimelock** | `0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74` | [View ↗](https://scan.testnet.initia.xyz/address/0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74) |
+| **USDC (Test)** | `0xA34Fa50612d20bEc3220c984135F41a806655Abd` | [View ↗](https://scan.testnet.initia.xyz/address/0xA34Fa50612d20bEc3220c984135F41a806655Abd) |
+| **SYLD (Test)** | `0xfDb0A9DFFDb93DA8329d5966324845213f31E328` | [View ↗](https://scan.testnet.initia.xyz/address/0xfDb0A9DFFDb93DA8329d5966324845213f31E328) |
 
 ### RPC Endpoints
 
