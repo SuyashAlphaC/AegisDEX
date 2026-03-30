@@ -15,6 +15,8 @@ import {
   useSettleBatch,
   useTotalVolume,
   useTotalMEVCaptured,
+  useQuoteBalance,
+  useBaseBalance,
 } from '@/hooks/useBatchDEX'
 import TransactionStatus from '@/components/TransactionStatus'
 import { shortenAddress } from '@/hooks/useInitiaUsernames'
@@ -33,6 +35,8 @@ export default function TradePage() {
   const { data: batchInfo } = useBatchInfo(batchId)
   const { data: totalVolume } = useTotalVolume()
   const { data: totalMEV } = useTotalMEVCaptured()
+  const { data: quoteBalance } = useQuoteBalance()
+  const { data: baseBalance } = useBaseBalance()
 
   // Write hooks
   const buyOrder = usePlaceBuyOrder()
@@ -159,6 +163,10 @@ export default function TradePage() {
                 placeholder="0.00"
                 className="w-full bg-transparent outline-none font-heading italic text-white text-3xl placeholder-white/20"
               />
+              <div className="mt-2 flex justify-between text-white/40 text-sm">
+                <span>SYLD: {quoteBalance ? parseFloat(formatEther(quoteBalance)).toFixed(2) : '0.00'}</span>
+                <span>USDC: {baseBalance ? parseFloat(formatEther(baseBalance)).toFixed(2) : '0.00'}</span>
+              </div>
             </div>
 
             <div className="liquid-glass rounded-xl px-4 py-3 flex justify-between items-center">

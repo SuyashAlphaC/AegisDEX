@@ -69,6 +69,9 @@ contract YieldRegistry is Ownable, ReentrancyGuard {
     /// @notice Pending reward accumulator for current (unfinalized) epoch
     uint256 public currentEpochDeposits;
 
+    /// @notice Maximum epochs to iterate per claim (gas safety cap)
+    uint256 public constant MAX_CLAIM_EPOCHS = 200;
+
     // ─── Events ─────────────────────────────────────────────────────────
 
     event HolderRegistered(
@@ -247,7 +250,9 @@ contract YieldRegistry is Ownable, ReentrancyGuard {
 
     /**
      * @notice Accumulate unclaimed epoch rewards for a holder.
-     * @dev    Iterates from lastClaimEpoch+1 to the latest finalized epoch.
+     * @dev    Iterates from lastClaimEpoch+1 to the latest finalized epoch,
+     *         capped at MAX_CLAIM_EPOCHS per call to prevent gas DoS.
+     *         If a holder has >200 unclaimed epochs, they call claim() multiple times.
      */
     function _accumulateRewards(address addr) internal {
         Holder storage h = holders[addr];
@@ -255,6 +260,11 @@ contract YieldRegistry is Ownable, ReentrancyGuard {
 
         uint256 fromEpoch = h.lastClaimEpoch + 1;
         uint256 toEpoch = currentEpoch > 1 ? currentEpoch - 1 : 0;
+
+        // Cap iteration to prevent gas DoS
+        if (toEpoch > fromEpoch + MAX_CLAIM_EPOCHS - 1) {
+            toEpoch = fromEpoch + MAX_CLAIM_EPOCHS - 1;
+        }
 
         uint256 accumulated = 0;
         for (uint256 e = fromEpoch; e <= toEpoch; e++) {
@@ -276,9 +286,10 @@ contract YieldRegistry is Ownable, ReentrancyGuard {
     // ─── View Functions ─────────────────────────────────────────────────
 
     /**
-     * @notice Compute pending claimable amount for a holder across all epochs.
+     * @notice Compute pending claimable amount for a holder (next claim batch).
+     * @dev    Caps at MAX_CLAIM_EPOCHS to match the actual claim behavior.
      * @param holder Address to check
-     * @return total Claimable amount
+     * @return total Claimable amount in next claim() call
      */
     function pendingClaim(
         address holder
@@ -290,6 +301,11 @@ contract YieldRegistry is Ownable, ReentrancyGuard {
 
         uint256 fromEpoch = h.lastClaimEpoch + 1;
         uint256 toEpoch = currentEpoch > 1 ? currentEpoch - 1 : 0;
+
+        // Match the cap from _accumulateRewards
+        if (toEpoch > fromEpoch + MAX_CLAIM_EPOCHS - 1) {
+            toEpoch = fromEpoch + MAX_CLAIM_EPOCHS - 1;
+        }
 
         for (uint256 e = fromEpoch; e <= toEpoch; e++) {
             EpochReward storage er = epochRewards[e];

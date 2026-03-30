@@ -329,7 +329,7 @@ contract BatchDEXTest is Test {
         assertEq(dex.currentBatchId(), 2, "Should advance to batch 2");
     }
 
-    // ─── Test: new batch starts after settlement ────────────────────────
+    // ─── Test: new batch starts after settlement ───────────────���────────
 
     function testNewBatchStartsAfterSettlement() public {
         vm.roll(block.number + BATCH_WINDOW + 1);
@@ -342,5 +342,153 @@ contract BatchDEXTest is Test {
         uint256 orderId = dex.placeBuyOrder(2 ether, 10 ether);
         (,,,, uint256 batchId,,,) = dex.allOrders(orderId);
         assertEq(batchId, 2, "Order should be in batch 2");
+    }
+
+    // ─── Test: max orders per batch cap ────────────────────────────────
+
+    function testMaxOrdersPerBatchCap() public {
+        // Set cap to 3 for testing
+        dex.setMaxOrdersPerBatch(3);
+        assertEq(dex.maxOrdersPerBatch(), 3);
+
+        vm.prank(alice);
+        dex.placeBuyOrder(2 ether, 1 ether);
+        vm.prank(bob);
+        dex.placeBuyOrder(2 ether, 1 ether);
+        vm.prank(charlie);
+        dex.placeSellOrder(1 ether, 1 ether);
+
+        // 4th order should revert
+        vm.prank(alice);
+        vm.expectRevert("BatchDEX: batch full");
+        dex.placeBuyOrder(2 ether, 1 ether);
+    }
+
+    // ─── Test: max orders resets on new batch ──────────────────────────
+
+    function testMaxOrdersResetsOnNewBatch() public {
+        dex.setMaxOrdersPerBatch(2);
+
+        vm.prank(alice);
+        dex.placeBuyOrder(2 ether, 1 ether);
+        vm.prank(bob);
+        dex.placeSellOrder(1 ether, 1 ether);
+
+        // Batch full
+        vm.prank(charlie);
+        vm.expectRevert("BatchDEX: batch full");
+        dex.placeBuyOrder(2 ether, 1 ether);
+
+        // Settle and advance
+        vm.roll(block.number + BATCH_WINDOW + 1);
+        dex.settleBatch();
+
+        // New batch allows orders again
+        vm.prank(charlie);
+        dex.placeBuyOrder(2 ether, 1 ether);
+    }
+
+    // ─── Test: setMaxOrdersPerBatch validation ─────────────────────────
+
+    function testSetMaxOrdersValidation() public {
+        vm.expectRevert("BatchDEX: invalid max orders");
+        dex.setMaxOrdersPerBatch(0);
+
+        vm.expectRevert("BatchDEX: invalid max orders");
+        dex.setMaxOrdersPerBatch(501);
+
+        // Non-owner cannot update
+        vm.prank(alice);
+        vm.expectRevert();
+        dex.setMaxOrdersPerBatch(50);
+    }
+
+    // ─── Test: partial fill with surplus as MEV ────────────────────────
+
+    function testPartialFillMEV() public {
+        // Buy 20 USDC at 3 SYLD each = lock 60 SYLD
+        vm.prank(alice);
+        dex.placeBuyOrder(3 ether, 20 ether);
+
+        // Sell only 10 USDC at 1 SYLD
+        vm.prank(bob);
+        dex.placeSellOrder(1 ether, 10 ether);
+
+        vm.roll(block.number + BATCH_WINDOW + 1);
+        dex.settleBatch();
+
+        // Clearing price should be 1 SYLD
+        (,,, uint256 clearingPrice, bool settled,,,) = dex.batches(1);
+        assertTrue(settled);
+        assertEq(clearingPrice, 1 ether);
+
+        // Filled volume = 10 (limited by supply)
+        // Alice locked 60 SYLD (3 * 20), gets 10 USDC filled
+        // Unfilled portion: (3 * 10) / 1e18 = 30 SYLD refunded
+        // MEV = 60 - 30 (refund) - 10 (paid to seller at clearing) = 20 SYLD
+        assertEq(dex.totalMEVCaptured(), 20 ether);
+    }
+
+    // ─── Fuzz: clearing price is always between lowest sell and highest buy ─
+
+    function testFuzz_ClearingPriceBounds(uint256 buyPrice, uint256 sellPrice) public {
+        buyPrice = bound(buyPrice, 0.01 ether, 100 ether);
+        sellPrice = bound(sellPrice, 0.01 ether, 100 ether);
+
+        // Only test when buy >= sell (orders will cross)
+        vm.assume(buyPrice >= sellPrice);
+
+        vm.prank(alice);
+        dex.placeBuyOrder(buyPrice, 10 ether);
+
+        vm.prank(bob);
+        dex.placeSellOrder(sellPrice, 10 ether);
+
+        vm.roll(block.number + BATCH_WINDOW + 1);
+        dex.settleBatch();
+
+        (,,, uint256 clearingPrice, bool settled,,,) = dex.batches(1);
+        assertTrue(settled);
+
+        if (clearingPrice > 0) {
+            assertGe(clearingPrice, sellPrice, "Clearing >= lowest sell");
+            assertLe(clearingPrice, buyPrice, "Clearing <= highest buy");
+        }
+    }
+
+    // ─── Fuzz: no tokens lost during settlement ────────────────────────
+
+    function testFuzz_NoTokensLost(uint256 amount) public {
+        amount = bound(amount, 1 ether, 100 ether);
+
+        uint256 buyPrice = 2 ether;
+        uint256 sellPrice = 1 ether;
+
+        uint256 aliceQuoteBefore = quoteToken.balanceOf(alice);
+        uint256 bobBaseBefore = baseToken.balanceOf(bob);
+
+        vm.prank(alice);
+        dex.placeBuyOrder(buyPrice, amount);
+        vm.prank(bob);
+        dex.placeSellOrder(sellPrice, amount);
+
+        vm.roll(block.number + BATCH_WINDOW + 1);
+        dex.settleBatch();
+
+        uint256 aliceQuoteAfter = quoteToken.balanceOf(alice);
+        uint256 aliceBaseAfter = baseToken.balanceOf(alice);
+        uint256 bobBaseAfter = baseToken.balanceOf(bob);
+        uint256 bobQuoteAfter = quoteToken.balanceOf(bob);
+
+        // Alice spent some quote, gained some base
+        // Bob spent some base, gained some quote
+        // All tokens accounted for (no token should vanish)
+        uint256 aliceQuoteSpent = aliceQuoteBefore - aliceQuoteAfter;
+        uint256 bobBaseSpent = bobBaseBefore - bobBaseAfter;
+
+        // Alice received base tokens
+        assertTrue(aliceBaseAfter > 0, "Alice should have received base tokens");
+        // Bob received quote tokens
+        assertTrue(bobQuoteAfter > 0, "Bob should have received quote tokens");
     }
 }

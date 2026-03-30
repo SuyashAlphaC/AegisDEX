@@ -87,6 +87,29 @@ export function useBatchInfo(batchId: bigint | undefined) {
   })
 }
 
+// ─── Balance Hooks ───────────────────────────────────────────────────────
+export function useQuoteBalance() {
+  const { address } = useAccount()
+  return useReadContract({
+    address: CONTRACTS.quoteToken,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address, refetchInterval: 5000 },
+  })
+}
+
+export function useBaseBalance() {
+  const { address } = useAccount()
+  return useReadContract({
+    address: CONTRACTS.baseToken,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address, refetchInterval: 5000 },
+  })
+}
+
 // ─── Write Hooks ────────────────────────────────────────────────────────
 
 export function usePlaceBuyOrder() {

@@ -130,6 +130,13 @@ export const BATCH_DEX_ABI = [
   },
   {
     type: 'function',
+    name: 'maxOrdersPerBatch',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'batches',
     inputs: [{ name: '', type: 'uint256' }],
     outputs: [

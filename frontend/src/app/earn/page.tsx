@@ -70,11 +70,6 @@ export default function EarnPage() {
   const initName = interwovenUsername || fetchedName
   const hasUsername = !!initName
 
-  console.log('initiaAddress:', initiaAddress)
-  console.log('interwovenUsername:', interwovenUsername) 
-  console.log('fetchedName:', fetchedName)
-  console.log('hasUsername:', hasUsername)
-
   // Write hooks
   const registerHook = useRegister()
   const deregisterHook = useDeregister()

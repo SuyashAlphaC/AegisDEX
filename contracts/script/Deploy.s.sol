@@ -76,7 +76,10 @@ contract Deploy is Script {
         );
         console.log("BatchDEX:           ", address(dex));
 
-        // ── 5. Deploy GovernanceTimelock ─────────────────────────────────
+        // ── 5. Transfer BatchDEX ownership to timelock after mainnet ────
+        //    (For testnet, deployer retains ownership for flexibility)
+
+        // ── 6. Deploy GovernanceTimelock ─────────────────────────────────
         GovernanceTimelock timelock = new GovernanceTimelock(
             multisig,
             48 hours

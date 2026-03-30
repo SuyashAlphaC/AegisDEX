@@ -147,4 +147,66 @@ contract RevenueRouterTest is Test {
         vm.expectRevert();
         router.updateShares(5000, 3000, 2000);
     }
+
+    // ─── Test: custom split ratios work correctly ──────────────────────
+
+    function testCustomSplitRatios() public {
+        // Change to 80/15/5
+        router.updateShares(8000, 1500, 500);
+
+        uint256 amount = 1000 ether;
+        uint256 registryBefore = rewardToken.balanceOf(address(registry));
+        uint256 treasuryBefore = rewardToken.balanceOf(treasury);
+        uint256 devBefore = rewardToken.balanceOf(devFund);
+
+        router.routeRevenue(amount);
+
+        assertEq(rewardToken.balanceOf(address(registry)) - registryBefore, 800 ether);
+        assertEq(rewardToken.balanceOf(treasury) - treasuryBefore, 150 ether);
+        assertEq(rewardToken.balanceOf(devFund) - devBefore, 50 ether);
+    }
+
+    // ─── Test: multiple sequential distributions ───────────────────────
+
+    function testMultipleDistributions() public {
+        router.routeRevenue(100 ether);
+        router.routeRevenue(200 ether);
+        router.routeRevenue(300 ether);
+
+        assertEq(router.totalRouted(), 600 ether);
+        assertEq(router.totalToHolders(), 360 ether); // 60% of 600
+        assertEq(router.totalToDAO(), 180 ether);     // 30% of 600
+        assertEq(router.totalToDev(), 60 ether);      // 10% of 600
+    }
+
+    // ─── Test: update addresses with zero reverts ──────────────────────
+
+    function testUpdateAddressesZeroReverts() public {
+        vm.expectRevert("RevenueRouter: zero registry");
+        router.updateAddresses(address(0), treasury, devFund);
+
+        vm.expectRevert("RevenueRouter: zero treasury");
+        router.updateAddresses(address(registry), address(0), devFund);
+
+        vm.expectRevert("RevenueRouter: zero dev fund");
+        router.updateAddresses(address(registry), treasury, address(0));
+    }
+
+    // ─── Fuzz: split always sums to input amount ───────────────────────
+
+    function testFuzz_SplitSumsToInput(uint256 amount) public {
+        amount = bound(amount, 1, 10000 ether);
+
+        uint256 totalBefore = rewardToken.balanceOf(address(registry))
+            + rewardToken.balanceOf(treasury)
+            + rewardToken.balanceOf(devFund);
+
+        router.routeRevenue(amount);
+
+        uint256 totalAfter = rewardToken.balanceOf(address(registry))
+            + rewardToken.balanceOf(treasury)
+            + rewardToken.balanceOf(devFund);
+
+        assertEq(totalAfter - totalBefore, amount, "Split must sum to input");
+    }
 }

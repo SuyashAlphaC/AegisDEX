@@ -2,13 +2,55 @@
 
 **SocialYield** is a sovereign Initia Appchain featuring a specialized Batch-Auction DEX that productizes sequencer revenue. By structurally eliminating front-running and internalizing arbitrage value, SocialYield transforms the **.init name** from a simple identity primitive into a high-yield productive asset.
 
+🚀 **Live on Initia Testnet** | 📊 [Metrics Dashboard](#testnet-deployment) | 📖 [Testing Guide](./DEMO_GUIDE.md) | 🔒 [Security Model](./SECURITY.md) | 📈 [GTM Strategy](./GTM_STRATEGY.md)
+
+---
+
+## 🌐 Testnet Deployment
+
+**Network**: Initia Testnet (`minievm-2`)
+**Status**: ✅ Fully Operational
+**EVM Chain ID**: `2124225178762456`
+
+### Deployed Contract Addresses
+
+| Contract | Address | Explorer |
+|----------|---------|----------|
+| **BatchDEX** | `0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5` | [View ↗](https://scan.testnet.initia.xyz/address/0x7Be218B5D6D22B9DF8a20c009fbC7a621a6667d5) |
+| **YieldRegistry** | `0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7` | [View ↗](https://scan.testnet.initia.xyz/address/0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7) |
+| **RevenueRouter** | `0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A` | [View ↗](https://scan.testnet.initia.xyz/address/0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A) |
+| **GovernanceTimelock** | `0xd059B82372B751D12f4641160a5d0b19B166ff63` | [View ↗](https://scan.testnet.initia.xyz/address/0xd059B82372B751D12f4641160a5d0b19B166ff63) |
+| **USDC (Test)** | `0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923` | [View ↗](https://scan.testnet.initia.xyz/address/0x66D61B6D6c7BCe320EADddd7b9364EF59d4FC923) |
+| **SYLD (Test)** | `0x9f6292F57EDD679120f540638D7A9CAC2681573F` | [View ↗](https://scan.testnet.initia.xyz/address/0x9f6292F57EDD679120f540638D7A9CAC2681573F) |
+
+### RPC Endpoints
+
+```bash
+# EVM JSON-RPC
+https://jsonrpc-evm-1.anvil.asia-southeast.initia.xyz
+
+# Cosmos RPC/REST
+https://rpc.testnet.initia.xyz:443
+https://rest.testnet.initia.xyz
+```
+
+### Try It Now
+
+1. **Connect Wallet**: Keplr or Leap with Initia testnet support
+2. **Get Testnet Tokens**: Use built-in faucet (100 USDC + 100 SYLD/day)
+3. **Place Orders**: Trade with MEV protection via batch auctions
+4. **Register .init Name**: Start earning passive yield from protocol MEV
+5. **Claim Rewards**: Receive SYLD tokens every epoch (~8 minutes)
+
+📖 **Full Testing Guide**: See [DEMO_GUIDE.md](./DEMO_GUIDE.md) for step-by-step instructions.
+
 ---
 
 ## 🚀 The Core Thesis
 
 On legacy networks, MEV (Maximal Extractable Value) is a "tax" on retail users that flows to bots and validators. **SocialYield changes the equation.**
 
-Built on the Initia Interwoven Stack, SocialYield captures 100% of sequencer revenue and "socializes" it. Instead of leaking value, we route it back to the community via a transparent, automated protocol.
+Built on the Initia Interwoven Stack, SocialYield captures order surplus (the difference between limit prices and uniform clearing prices) and "socializes" it. By structurally eliminating front-running through batch auctions, the value that would normally leak to MEV bots is instead captured at the protocol level and redistributed to the community.
 
 ### **The Economic Flywheel**
 1. **Trading Volume** generates Sequencer Fees and Arbitrage Surplus.
@@ -35,9 +77,10 @@ We have implemented a native **Yield Registry** that bridges Initia's identity l
     * **10%** for protocol insurance/maintenance.
 
 ### 3. "Invisible Chain" UX
-Leveraging Initia’s native UX primitives, SocialYield feels like a Centralized Exchange:
-* **Session Keys:** Using `InterwovenKit`'s `enableAutoSign`, users approve a single session and trade instantly without wallet popups.
-* **Interwoven Bridge:** Users can deposit assets from any Minitia rollup into the SocialYield Batch window with a single click.
+Leveraging Initia’s native UX primitives, SocialYield minimizes friction:
+* **Smart Auto-Approval:** Token approvals are batched with order placement — users experience a single-click trade flow after initial setup.
+* **InterwovenKit Integration:** Native `.init` name detection, wallet connection, and chain auto-configuration via `@initia/interwovenkit-react`.
+* **Real-Time Batch Status:** Live block countdown, progress bars, and order book updates with automatic refetching.
 
 ---
 
@@ -46,13 +89,13 @@ Leveraging Initia’s native UX primitives, SocialYield feels like a Centralized
 ### **Smart Contract Architecture**
 * **`BatchDEX.sol`**: The core execution engine. Manages order state machines and uniform price clearing.
 * **`YieldRegistry.sol`**: Manages the distribution logic and maps rewards to `.init` identities.
-* **`RevenueRouter.sol`**: The protocol's "Lungs"—receives sequencer fees and pumps them into the distribution pools.
+* **`RevenueRouter.sol`**: The protocol's "Lungs"—receives order surplus from batch settlements and pumps them into the distribution pools.
 * **`GovernanceTimelock.sol`**: Ensures that the community has a 48-hour window to review any changes to the revenue split.
 
 ### **Frontend Stack**
 * **Framework**: Next.js 14 + Tailwind CSS.
-* **Identity**: `@initia/interwovenkit-react` for native `.init` username resolution.
-* **Interoperability**: Custom hooks (`useBatchDEX.ts`) for managing cross-chain asset movements via the Interwoven Bridge.
+* **Identity**: `@initia/interwovenkit-react` for native `.init` username resolution via L1 REST API.
+* **Contract Hooks**: Custom hooks (`useBatchDEX.ts`, `useYieldRegistry.ts`) for smart approval flows, real-time batch status, and epoch tracking.
 
 ---
 
@@ -78,6 +121,20 @@ cd frontend
 npm install
 npm run dev
 ```
+
+---
+
+## 🔒 Security Hardening
+
+SocialYield implements multiple layers of protection against known DeFi attack vectors:
+
+* **Gas Safety Caps**: `maxOrdersPerBatch` (default: 100, max: 500) prevents gas-bomb attacks on batch settlement. `MAX_CLAIM_EPOCHS` (200) caps reward iteration per claim to prevent DoS.
+* **Reentrancy Protection**: All state-changing functions use OpenZeppelin `ReentrancyGuard`.
+* **Access Control**: Owner-gated admin functions, router-gated deposits, multisig-gated governance.
+* **Governance Timelock**: 48-hour delay on parameter changes with 14-day grace period.
+* **Owner-Gated Minting**: TestToken minting restricted to deployer (prevents inflation attacks on testnet metrics).
+
+See [SECURITY.md](./SECURITY.md) for the full threat model and design rationale.
 
 ---
 

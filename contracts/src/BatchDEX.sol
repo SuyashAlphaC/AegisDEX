@@ -37,6 +37,9 @@ contract BatchDEX is Ownable, ReentrancyGuard {
     /// @notice Number of blocks per batch window (default: 10)
     uint256 public batchWindow;
 
+    /// @notice Maximum number of orders allowed per batch (gas safety cap)
+    uint256 public maxOrdersPerBatch;
+
     /// @notice Current batch identifier (auto-increments on settlement)
     uint256 public currentBatchId;
 
@@ -123,6 +126,7 @@ contract BatchDEX is Ownable, ReentrancyGuard {
     );
 
     event BatchWindowUpdated(uint256 oldWindow, uint256 newWindow);
+    event MaxOrdersUpdated(uint256 oldMax, uint256 newMax);
 
     // ─── Constructor ────────────────────────────────────────────────────
 
@@ -147,6 +151,7 @@ contract BatchDEX is Ownable, ReentrancyGuard {
         quoteToken = IERC20(_quoteToken);
         revenueRouter = _revenueRouter;
         batchWindow = _batchWindow;
+        maxOrdersPerBatch = 100;
         currentBatchId = 1;
         batchStartBlock = block.number;
 
@@ -177,6 +182,10 @@ contract BatchDEX is Ownable, ReentrancyGuard {
         require(limitPrice > 0, "BatchDEX: zero limit price");
         require(amount > 0, "BatchDEX: zero amount");
         require(!batches[currentBatchId].settled, "BatchDEX: batch already settled");
+        require(
+            _batchOrderIndices[currentBatchId].length < maxOrdersPerBatch,
+            "BatchDEX: batch full"
+        );
 
         // Calculate the quoteToken cost: (limitPrice * amount) / 1e18
         uint256 quoteCost = (limitPrice * amount) / 1e18;
@@ -218,6 +227,10 @@ contract BatchDEX is Ownable, ReentrancyGuard {
         require(limitPrice > 0, "BatchDEX: zero limit price");
         require(amount > 0, "BatchDEX: zero amount");
         require(!batches[currentBatchId].settled, "BatchDEX: batch already settled");
+        require(
+            _batchOrderIndices[currentBatchId].length < maxOrdersPerBatch,
+            "BatchDEX: batch full"
+        );
 
         // Lock baseToken from seller
         baseToken.safeTransferFrom(msg.sender, address(this), amount);
@@ -286,12 +299,12 @@ contract BatchDEX is Ownable, ReentrancyGuard {
             uint256[] memory sellIndices
         ) = _separateOrders(orderIndices, batch.buyOrderCount, batch.sellOrderCount);
 
-        // Compute clearing price (also sorts buys desc, sells asc in-memory)
-        (uint256 clearingPrice, uint256 filledVolume) = _computeClearingPrice(buys, sells);
-
-        // Sort indices to match the sorted order arrays
+        // Co-sort orders with their indices (single pass each)
         _sortBuyIndicesDescending(buys, buyIndices);
         _sortSellIndicesAscending(sells, sellIndices);
+
+        // Compute clearing price on pre-sorted arrays
+        (uint256 clearingPrice, uint256 filledVolume) = _computeClearingPrice(buys, sells);
 
         batch.clearingPrice = clearingPrice;
         batch.endBlock = block.number;
@@ -541,12 +554,12 @@ contract BatchDEX is Ownable, ReentrancyGuard {
      * @notice Computes the uniform clearing price using sorted demand/supply
      *         curve intersection.
      * @dev    Algorithm:
-     *         1. Sort buys descending by limitPrice (demand curve)
-     *         2. Sort sells ascending by limitPrice (supply curve)
+     *         1. Expects buys pre-sorted descending by limitPrice (demand curve)
+     *         2. Expects sells pre-sorted ascending by limitPrice (supply curve)
      *         3. Walk both curves: accumulate demand and supply quantities
      *         4. Clearing price = the price where cumulative supply meets demand
-     * @param buys   Array of buy orders (will be sorted in-place)
-     * @param sells  Array of sell orders (will be sorted in-place)
+     * @param buys   Array of buy orders (must be pre-sorted descending by limitPrice)
+     * @param sells  Array of sell orders (must be pre-sorted ascending by limitPrice)
      * @return clearingPrice  The uniform clearing price (18 decimals)
      * @return filledVolume   Total base token volume that can be filled
      */
@@ -558,10 +571,7 @@ contract BatchDEX is Ownable, ReentrancyGuard {
             return (0, 0);
         }
 
-        // Sort buys descending by limitPrice (insertion sort for simplicity)
-        _sortBuysDescending(buys);
-        // Sort sells ascending by limitPrice
-        _sortSellsAscending(sells);
+        // Arrays are pre-sorted by caller (_sortBuyIndicesDescending / _sortSellIndicesAscending)
 
         // Check if any crossing is possible:
         // Highest buy must be >= lowest sell for a trade to occur
@@ -602,39 +612,6 @@ contract BatchDEX is Ownable, ReentrancyGuard {
                 }
                 break;
             }
-        }
-    }
-
-    /**
-     * @notice Sort buy orders descending by limitPrice (insertion sort).
-     * @dev    O(n²) but acceptable for on-chain batch sizes (< 100 orders typically).
-     */
-    function _sortBuysDescending(Order[] memory orders) internal pure {
-        uint256 n = orders.length;
-        for (uint256 i = 1; i < n; i++) {
-            Order memory key = orders[i];
-            uint256 j = i;
-            while (j > 0 && orders[j - 1].limitPrice < key.limitPrice) {
-                orders[j] = orders[j - 1];
-                j--;
-            }
-            orders[j] = key;
-        }
-    }
-
-    /**
-     * @notice Sort sell orders ascending by limitPrice (insertion sort).
-     */
-    function _sortSellsAscending(Order[] memory orders) internal pure {
-        uint256 n = orders.length;
-        for (uint256 i = 1; i < n; i++) {
-            Order memory key = orders[i];
-            uint256 j = i;
-            while (j > 0 && orders[j - 1].limitPrice > key.limitPrice) {
-                orders[j] = orders[j - 1];
-                j--;
-            }
-            orders[j] = key;
         }
     }
 
@@ -709,6 +686,17 @@ contract BatchDEX is Ownable, ReentrancyGuard {
         uint256 oldWindow = batchWindow;
         batchWindow = newWindow;
         emit BatchWindowUpdated(oldWindow, newWindow);
+    }
+
+    /**
+     * @notice Update the maximum orders per batch.
+     * @param newMax New maximum (must be > 0, capped at 500)
+     */
+    function setMaxOrdersPerBatch(uint256 newMax) external onlyOwner {
+        require(newMax > 0 && newMax <= 500, "BatchDEX: invalid max orders");
+        uint256 oldMax = maxOrdersPerBatch;
+        maxOrdersPerBatch = newMax;
+        emit MaxOrdersUpdated(oldMax, newMax);
     }
 
     /**

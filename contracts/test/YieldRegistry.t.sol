@@ -30,7 +30,9 @@ contract YieldRegistryTest is Test {
             EPOCH_LENGTH
         );
 
-        // Fund router with yield tokens for deposits
+        // Fund the registry directly (simulating what RevenueRouter does: transfer then depositReward)
+        // Also fund routerAddr for tests that need it
+        yieldToken.mint(address(registry), 100000 ether);
         yieldToken.mint(routerAddr, 100000 ether);
         vm.prank(routerAddr);
         yieldToken.approve(address(registry), type(uint256).max);
@@ -77,9 +79,9 @@ contract YieldRegistryTest is Test {
         registry.depositReward(amount);
 
         assertEq(
-            yieldToken.balanceOf(address(registry)),
+            registry.currentEpochDeposits(),
             amount,
-            "Registry should hold deposited tokens"
+            "Epoch deposits should reflect deposited amount"
         );
     }
 
@@ -201,7 +203,7 @@ contract YieldRegistryTest is Test {
         assertEq(registry.epochLength(), 500);
     }
 
-    // ─── Test: blocks until next epoch ──────────────────────────────────
+    // ─���─ Test: blocks until next epoch ──────────────────────────────────
 
     function testBlocksUntilNextEpoch() public {
         uint256 remaining = registry.blocksUntilNextEpoch();
@@ -214,5 +216,133 @@ contract YieldRegistryTest is Test {
         vm.roll(block.number + EPOCH_LENGTH);
         remaining = registry.blocksUntilNextEpoch();
         assertEq(remaining, 0);
+    }
+
+    // ─── Test: MAX_CLAIM_EPOCHS caps iteration ─────────────────────────
+
+    function testMaxClaimEpochsCap() public {
+        // Use a very short epoch for speed
+        registry.setEpochLength(10);
+
+        vm.prank(alice);
+        registry.register("alice.init");
+
+        // Create 250 epochs with rewards (exceeds 200 cap)
+        for (uint256 i = 0; i < 250; i++) {
+            vm.prank(routerAddr);
+            registry.depositReward(1 ether);
+            vm.roll(block.number + 11);
+            registry.finalizeEpoch();
+        }
+
+        // pendingClaim should only cover 200 epochs (the cap)
+        uint256 pending = registry.pendingClaim(alice);
+        assertEq(pending, 200 ether, "Should be capped at 200 epochs");
+
+        // First claim gets 200 epochs
+        vm.prank(alice);
+        registry.claim();
+        assertEq(yieldToken.balanceOf(alice), 200 ether);
+
+        // Second claim gets remaining 50
+        uint256 pending2 = registry.pendingClaim(alice);
+        assertEq(pending2, 50 ether, "Remaining 50 epochs");
+
+        vm.prank(alice);
+        registry.claim();
+        assertEq(yieldToken.balanceOf(alice), 250 ether);
+    }
+
+    // ─── Test: re-registration after deregister ────────────────────────
+
+    function testReRegistration() public {
+        vm.prank(alice);
+        registry.register("alice.init");
+        assertEq(registry.activeHolderCount(), 1);
+
+        vm.prank(alice);
+        registry.deregister();
+        assertEq(registry.activeHolderCount(), 0);
+
+        // Re-register
+        vm.prank(alice);
+        registry.register("alice2.init");
+        assertEq(registry.activeHolderCount(), 1);
+
+        // holderList should not have duplicates (same address re-used)
+        address[] memory list = registry.getHolderList();
+        assertEq(list.length, 1, "Should not duplicate in holderList");
+    }
+
+    // ─── Test: deregistered holder can still claim pending ─────────────
+
+    function testDeregisteredCanClaimPending() public {
+        vm.prank(alice);
+        registry.register("alice.init");
+
+        vm.prank(routerAddr);
+        registry.depositReward(100 ether);
+        vm.roll(block.number + EPOCH_LENGTH + 1);
+        registry.finalizeEpoch();
+
+        // Deregister AFTER epoch finalized
+        vm.prank(alice);
+        registry.deregister();
+
+        // Should still be able to claim
+        uint256 pending = registry.pendingClaim(alice);
+        assertEq(pending, 100 ether);
+
+        vm.prank(alice);
+        registry.claim();
+        assertEq(yieldToken.balanceOf(alice), 100 ether);
+    }
+
+    // ─── Test: zero holders epoch finalization ─────────────────────────
+
+    function testZeroHoldersEpochFinalization() public {
+        vm.prank(routerAddr);
+        registry.depositReward(100 ether);
+
+        vm.roll(block.number + EPOCH_LENGTH + 1);
+        registry.finalizeEpoch();
+
+        YieldRegistry.EpochReward memory er = registry.getEpochReward(1);
+        assertTrue(er.finalized);
+        assertEq(er.holderCount, 0);
+        assertEq(er.rewardPerHolder, 0);
+    }
+
+    // ─── Fuzz: pro-rata distribution is fair ───────────────────────────
+
+    function testFuzz_ProRataFairness(uint256 reward, uint8 numHolders) public {
+        reward = bound(reward, 1 ether, 10000 ether);
+        numHolders = uint8(bound(numHolders, 1, 10));
+
+        address[] memory holders = new address[](numHolders);
+        for (uint256 i = 0; i < numHolders; i++) {
+            holders[i] = address(uint160(0x1000 + i));
+            vm.prank(holders[i]);
+            registry.register(string(abi.encodePacked("holder", i)));
+        }
+
+        vm.prank(routerAddr);
+        registry.depositReward(reward);
+        vm.roll(block.number + EPOCH_LENGTH + 1);
+        registry.finalizeEpoch();
+
+        uint256 expectedPerHolder = reward / numHolders;
+        for (uint256 i = 0; i < numHolders; i++) {
+            uint256 pending = registry.pendingClaim(holders[i]);
+            assertEq(pending, expectedPerHolder, "Each holder gets equal share");
+        }
+    }
+
+    // ─── Test: only router can deposit ─────────────────────────────────
+
+    function testOnlyRouterCanDeposit() public {
+        vm.prank(alice);
+        vm.expectRevert("YieldRegistry: not router");
+        registry.depositReward(100 ether);
     }
 }
