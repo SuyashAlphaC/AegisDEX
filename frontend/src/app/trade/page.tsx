@@ -44,15 +44,14 @@ export default function TradePage() {
     setAutoSignLoading(true)
     try {
       if (autoSignEnabled) {
-        await (autoSign as any).disable(chainId)
+        await autoSign.disable(chainId)
         setAutoSignEnabled(false)
       } else {
-        await (autoSign as any).enable(chainId, { permissions: ["/minievm.evm.v1.MsgCall"] })
+        await autoSign.enable(chainId)
         setAutoSignEnabled(true)
       }
     } catch (err) {
       console.error('Auto-sign toggle failed', err)
-      // Check if it's an authorization error while disabling, in which case we consider it disabled
       if (err instanceof Error && err.message?.includes('authorization not found')) {
         setAutoSignEnabled(false)
       }
