@@ -25,6 +25,43 @@
 
 ---
 
+## Initia Hackathon Submission
+
+- **Project Name**: SocialYield
+
+### Project Overview
+
+SocialYield is a batch-auction DEX appchain on Initia (minievm-2) that structurally eliminates MEV extraction through frequent batch auctions and redistributes the captured order surplus as passive yield to registered `.init` name holders. It solves the problem of value leakage to MEV bots — which costs DeFi traders billions annually — while giving Initia's native identity layer real economic utility. Target users are MEV-aware DeFi traders seeking fair execution, `.init` name holders looking for zero-capital passive yield, and yield farmers seeking sustainable, non-inflationary APY.
+
+### Implementation Detail
+
+- **The Custom Implementation**: SocialYield's core innovation is a four-contract system (BatchDEX, RevenueRouter, YieldRegistry, GovernanceTimelock) that collects orders into 10-block batch windows, computes a uniform clearing price at the demand-supply intersection, captures the surplus between trader limit prices and the clearing price, and distributes it via a 60/30/10 split (holders/DAO/dev). If a batch contains only buy orders or only sell orders, no clearing price exists — the protocol safely refunds all participants and advances to the next batch. The system includes gas safety caps (100 orders/batch, 200 epochs/claim), invariant fuzz tests proving token conservation, and a 48-hour governance timelock on all parameter changes.
+
+- **The Native Feature**: SocialYield integrates all four Initia-native features:
+  1. **Initia Usernames (`.init`)** — The core of the yield model. `.init` names are resolved from the L1 usernames module via Move view functions and serve as the identity gate for yield eligibility. Only registered `.init` holders earn surplus rewards. (`frontend/src/hooks/useInitiaUsernames.ts`)
+  2. **Interwoven Kit** — Native wallet connection with automatic chain detection for minievm-2, `.init` username auto-resolution on connect, and wallet/bridge modal integration. (`frontend/src/app/providers.tsx`)
+  3. **Interwoven Bridge** — Cross-chain asset bridging embedded directly in the Trade page via `openBridge()`, allowing users to move assets to/from the appchain without leaving the app. (`frontend/src/app/trade/page.tsx`)
+  4. **Auto-sign / Session Keys** — Provider-level `enableAutoSign` configured for `/minievm.evm.v1.MsgCall` messages with a user-facing toggle on the Trade page, enabling frictionless multi-order placement without repeated wallet popups. (`frontend/src/app/providers.tsx`, `frontend/src/app/trade/page.tsx`)
+
+### How to Run Locally
+
+1. Clone the repository and install frontend dependencies:
+   ```bash
+   git clone https://github.com/SuyashAlphaC/SocialYield.git
+   cd SocialYield/frontend && npm install
+   ```
+2. Copy the environment config (already configured for minievm-2 testnet):
+   ```bash
+   cp .env.local.example .env.local  # or use the existing .env.local
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open `http://localhost:3000`, connect a wallet with a `.init` name, and follow the [Testing Guide](./DEMO_GUIDE.md) to place orders, settle batches, register for yield, and claim rewards.
+
+---
+
 ## Screenshots
 
 ### Landing Page
@@ -112,13 +149,20 @@ SocialYield integrates three Initia-native features:
 
 ---
 
-## Testnet Deployment
+## Appchain Development & Deployment
+
+SocialYield was developed and tested on a **local sovereign rollup** (`socialyield-1`, EVM Chain ID `1538162949916829`) spun up via the Weave CLI (`weave init`), with its own operator, validator, bridge executor, batch submitter, and challenger. This local appchain served as the development environment for iterating on the smart contracts and frontend integration before deploying to the public testnet.
+
+For the hackathon submission, the project is deployed on **`minievm-2`** — Initia's public MiniEVM testnet rollup — so that judges and users can interact with the live contracts and verify deployment on [Initia Scan](https://scan.testnet.initia.xyz/minievm-2). The local chain configuration is preserved in `.initia/local-ids.md` and `~/.weave/data/minitia.config.json`.
+
+### Testnet Deployment
 
 | | |
 |---|---|
 | **Network** | Initia Testnet (`minievm-2`) |
 | **EVM Chain ID** | `2124225178762456` |
 | **Status** | Fully Operational |
+| **Local Dev Chain** | `socialyield-1` (EVM Chain ID `1538162949916829`) |
 
 ### Contract Addresses
 

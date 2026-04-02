@@ -1,12 +1,27 @@
 {
   "project_name": "SocialYield",
-  "repo_url": "https://github.com/SuyashAlphaC/AegisDEX",
-  "commit_sha": "7004b0d7ed1660131cbe951ddf7b07d4f67b10ac",
+  "repo_url": "https://github.com/SuyashAlphaC/SocialYield",
+  "commit_sha": "e21bebc58ec97d61a2a60a3b41ae6907d5a595ba",
   "rollup_chain_id": "minievm-2",
   "deployed_address": "0xc37F0d3f439FBA4E5b134271BA910ab544BE466f",
   "vm": "evm",
   "native_feature": "initia-usernames",
   "core_logic_path": "contracts/src/BatchDEX.sol",
   "native_feature_frontend_path": "frontend/src/hooks/useInitiaUsernames.ts",
-  "demo_video_url": "<FILL_AFTER_RECORDING>"
+  "demo_video_url": "https://youtu.be/8i1QoPnzbDs",
+  "additional_native_features": [
+    {
+      "feature": "auto-signing",
+      "frontend_path": "frontend/src/app/trade/page.tsx",
+      "provider_path": "frontend/src/app/providers.tsx"
+    },
+    {
+      "feature": "interwoven-bridge",
+      "frontend_path": "frontend/src/app/trade/page.tsx"
+    },
+    {
+      "feature": "interwoven-kit",
+      "frontend_path": "frontend/src/app/providers.tsx"
+    }
+  ]
 }
