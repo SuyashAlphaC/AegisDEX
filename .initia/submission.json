@@ -1,7 +1,7 @@
 {
   "project_name": "SocialYield",
   "repo_url": "https://github.com/SuyashAlphaC/SocialYield",
-  "commit_sha": "e21bebc58ec97d61a2a60a3b41ae6907d5a595ba",
+  "commit_sha": "5be04da019408bc59c66db216c41cbf4a2d3e266",
   "rollup_chain_id": "socialyield-1",
   "deployed_address": "0xd059B82372B751D12f4641160a5d0b19B166ff63",
   "vm": "evm",
