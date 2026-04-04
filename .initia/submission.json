@@ -2,8 +2,8 @@
   "project_name": "SocialYield",
   "repo_url": "https://github.com/SuyashAlphaC/SocialYield",
   "commit_sha": "e21bebc58ec97d61a2a60a3b41ae6907d5a595ba",
-  "rollup_chain_id": "minievm-2",
-  "deployed_address": "0xc37F0d3f439FBA4E5b134271BA910ab544BE466f",
+  "rollup_chain_id": "socialyield-1",
+  "deployed_address": "0xd059B82372B751D12f4641160a5d0b19B166ff63",
   "vm": "evm",
   "native_feature": "initia-usernames",
   "core_logic_path": "contracts/src/BatchDEX.sol",
@@ -23,5 +23,42 @@
       "feature": "interwoven-kit",
       "frontend_path": "frontend/src/app/providers.tsx"
     }
-  ]
+  ],
+  "sovereign_rollup": {
+    "rollup_chain_id": "socialyield-1",
+    "evm_chain_id": "1542523109398685",
+    "l1_bridge_id": "1774",
+    "l1_verification_url": "https://rest.testnet.initia.xyz/opinit/ophost/v1/bridges/1774",
+    "l1_bridge_addr": "init1fdj8qsxgrqt597t8q74p3fvtn8g6mhqp8z4tdvugwz57wz0ldaksyttf9j",
+    "magic_link": "https://scan.testnet.initia.xyz/custom-network/add/link?config=eyJ2bSI6ImV2bSIsImNoYWluSWQiOiJzb2NpYWx5aWVsZC0xIiwibWluR2FzUHJpY2UiOjAsImRlbm9tIjoiR0FTIiwibGNkIjoiaHR0cDovL2xvY2FsaG9zdDoxMzE3IiwicnBjIjoiaHR0cDovL2xvY2FsaG9zdDoyNjY1NyIsImpzb25ScGMiOiJodHRwOi8vbG9jYWxob3N0Ojg1NDUiLCJpbmRleGVyIjoiaHR0cDovL2xvY2FsaG9zdDo2NzY3In0=",
+    "da_layer": "initia",
+    "oracle_enabled": true,
+    "contracts": {
+      "BatchDEX": "0xd059B82372B751D12f4641160a5d0b19B166ff63",
+      "YieldRegistry": "0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A",
+      "RevenueRouter": "0xCA019df8C0D773D3535CDBd379d84F67efd1fA8F",
+      "GovernanceTimelock": "0x61792F4D31Cb8Ee810759EEFD8F28fA997c60496",
+      "USDC": "0x9f6292F57EDD679120f540638D7A9CAC2681573F",
+      "SYLD": "0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7"
+    }
+  },
+  "public_testnet": {
+    "rollup_chain_id": "minievm-2",
+    "evm_chain_id": "2124225178762456",
+    "live_app": " https://social-yield-sand.vercel.app/",
+    "contracts": {
+      "BatchDEX": "0xbbD6525b878deB33188077B35f29B708d28B0C88",
+      "YieldRegistry": "0xc37F0d3f439FBA4E5b134271BA910ab544BE466f",
+      "RevenueRouter": "0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83",
+      "GovernanceTimelock": "0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74",
+      "USDC": "0xA34Fa50612d20bEc3220c984135F41a806655Abd",
+      "SYLD": "0xfDb0A9DFFDb93DA8329d5966324845213f31E328"
+    },
+    "initia_scan_links": {
+      "BatchDEX": "https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xbbD6525b878deB33188077B35f29B708d28B0C88/",
+      "YieldRegistry": "https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xc37F0d3f439FBA4E5b134271BA910ab544BE466f/",
+      "RevenueRouter": "https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83/",
+      "GovernanceTimelock": "https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74/"
+    }
+  }
 }

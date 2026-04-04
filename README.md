@@ -20,7 +20,7 @@
 > **SocialYield** is a sovereign Initia rollup (minievm-2) that structurally eliminates front-running through Frequent Batch Auctions. The surplus between limit prices and the uniform clearing price — value that would normally leak to MEV bots — is captured at the protocol level and distributed to registered `.init` identity holders as passive yield.
 
 <p align="center">
-  <a href="https://socialyield.vercel.app">Live App</a> · <a href="./DEMO_GUIDE.md">Testing Guide</a> · <a href="./SECURITY.md">Security Model</a> · <a href="./GTM_STRATEGY.md">GTM Strategy</a>
+  <a href=" https://social-yield-sand.vercel.app/">Live App</a> · <a href="./DEMO_GUIDE.md">Testing Guide</a> · <a href="./SECURITY.md">Security Model</a> · <a href="./GTM_STRATEGY.md">GTM Strategy</a>
 </p>
 
 ---
@@ -151,34 +151,62 @@ SocialYield integrates three Initia-native features:
 
 ## Appchain Development & Deployment
 
-SocialYield was developed and tested on a **local sovereign rollup** (`socialyield-1`, EVM Chain ID `1538162949916829`) spun up via the Weave CLI (`weave init`), with its own operator, validator, bridge executor, batch submitter, and challenger. This local appchain served as the development environment for iterating on the smart contracts and frontend integration before deploying to the public testnet.
+SocialYield uses a **dual-deployment approach**: the protocol runs on its own sovereign Initia rollup (`socialyield-1`) for full appchain independence, and is also deployed on Initia's public MiniEVM testnet (`minievm-2`) for broader accessibility and on-chain verification.
 
-For the hackathon submission, the project is deployed on **`minievm-2`** — Initia's public MiniEVM testnet rollup — so that judges and users can interact with the live contracts and verify deployment on [Initia Scan](https://scan.testnet.initia.xyz/minievm-2). The local chain configuration is preserved in `.initia/local-ids.md` and `~/.weave/data/minitia.config.json`.
+### Sovereign Rollup: `socialyield-1`
 
-### Testnet Deployment
+SocialYield's own rollup was launched via the Weave CLI with its own operator, validator, bridge executor, batch submitter, and challenger. The rollup is **registered on Initia L1 testnet** (`initiation-2`) as **Bridge ID 1774**.
+
+**Verify the rollup registration on Initia L1:**
+[`https://rest.testnet.initia.xyz/opinit/ophost/v1/bridges/1774`](https://rest.testnet.initia.xyz/opinit/ophost/v1/bridges/1774) — returns the full bridge config including challenger, proposer, batch submitter, DA layer, and oracle status.
+
+**Explore the rollup locally via Initia Scan (magic link):**
+[Open in Initia Scan](https://scan.testnet.initia.xyz/custom-network/add/link?config=eyJ2bSI6ImV2bSIsImNoYWluSWQiOiJzb2NpYWx5aWVsZC0xIiwibWluR2FzUHJpY2UiOjAsImRlbm9tIjoiR0FTIiwibGNkIjoiaHR0cDovL2xvY2FsaG9zdDoxMzE3IiwicnBjIjoiaHR0cDovL2xvY2FsaG9zdDoyNjY1NyIsImpzb25ScGMiOiJodHRwOi8vbG9jYWxob3N0Ojg1NDUiLCJpbmRleGVyIjoiaHR0cDovL2xvY2FsaG9zdDo2NzY3In0=) *(requires the rollup node running locally — use Chrome)*
+
+| | |
+|---|---|
+| **Rollup Chain ID** | `socialyield-1` |
+| **EVM Chain ID** | `1542523109398685` |
+| **VM** | MiniEVM (v1.2.15) |
+| **L1 Settlement** | `initiation-2` (Initia Testnet) |
+| **L1 Bridge ID** | `1774` ([verify on L1](https://rest.testnet.initia.xyz/opinit/ophost/v1/bridges/1774)) |
+| **DA Layer** | Initia |
+| **Oracle** | Enabled |
+| **Status** | Fully Operational |
+
+| Contract | Address |
+|----------|---------|
+| **BatchDEX** | `0xd059B82372B751D12f4641160a5d0b19B166ff63` |
+| **YieldRegistry** | `0x7fF2FCb057d4B6747D5d2d2BDF5249CF7241Af7A` |
+| **RevenueRouter** | `0xCA019df8C0D773D3535CDBd379d84F67efd1fA8F` |
+| **GovernanceTimelock** | `0x61792F4D31Cb8Ee810759EEFD8F28fA997c60496` |
+| **USDC (Test)** | `0x9f6292F57EDD679120f540638D7A9CAC2681573F` |
+| **SYLD (Test)** | `0xc3b703885dE6F2fA25Fa315268F69A56f677FCA7` |
+
+### Public Testnet: `minievm-2` (Publicly Verifiable)
+
+The same contracts are also deployed on Initia's shared MiniEVM testnet for public verification. All contract addresses below are verifiable on [Initia Scan](https://scan.testnet.initia.xyz/evm-1).
 
 | | |
 |---|---|
 | **Network** | Initia Testnet (`minievm-2`) |
 | **EVM Chain ID** | `2124225178762456` |
 | **Status** | Fully Operational |
-| **Local Dev Chain** | `socialyield-1` (EVM Chain ID `1538162949916829`) |
-
-### Contract Addresses
+| **Live App** | [socialyield.vercel.app]( https://social-yield-sand.vercel.app/) |
 
 | Contract | Address |
 |----------|---------|
-| **BatchDEX** | [`0xbbD6525b878deB33188077B35f29B708d28B0C88`](https://scan.testnet.initia.xyz/address/0xbbD6525b878deB33188077B35f29B708d28B0C88) |
-| **YieldRegistry** | [`0xc37F0d3f439FBA4E5b134271BA910ab544BE466f`](https://scan.testnet.initia.xyz/address/0xc37F0d3f439FBA4E5b134271BA910ab544BE466f) |
-| **RevenueRouter** | [`0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83`](https://scan.testnet.initia.xyz/address/0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83) |
-| **GovernanceTimelock** | [`0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74`](https://scan.testnet.initia.xyz/address/0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74) |
-| **USDC (Test)** | [`0xA34Fa50612d20bEc3220c984135F41a806655Abd`](https://scan.testnet.initia.xyz/address/0xA34Fa50612d20bEc3220c984135F41a806655Abd) |
-| **SYLD (Test)** | [`0xfDb0A9DFFDb93DA8329d5966324845213f31E328`](https://scan.testnet.initia.xyz/address/0xfDb0A9DFFDb93DA8329d5966324845213f31E328) |
+| **BatchDEX** | [`0xbbD6525b878deB33188077B35f29B708d28B0C88`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xbbD6525b878deB33188077B35f29B708d28B0C88/) |
+| **YieldRegistry** | [`0xc37F0d3f439FBA4E5b134271BA910ab544BE466f`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xc37F0d3f439FBA4E5b134271BA910ab544BE466f/) |
+| **RevenueRouter** | [`0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xb252F649255E4259a4853E8B55e7ddEbCe2dcD83/) |
+| **GovernanceTimelock** | [`0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xC99eDAA459828ece11F72a3bD8F04bfc60fabC74/) |
+| **USDC (Test)** | [`0xA34Fa50612d20bEc3220c984135F41a806655Abd`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xA34Fa50612d20bEc3220c984135F41a806655Abd/) |
+| **SYLD (Test)** | [`0xfDb0A9DFFDb93DA8329d5966324845213f31E328`](https://scan.testnet.initia.xyz/evm-1/evm-contracts/0xfDb0A9DFFDb93DA8329d5966324845213f31E328/) |
 
 ### Quick Start
 
 ```
-1. Visit https://socialyield.vercel.app
+1. Visit  https://social-yield-sand.vercel.app/
 2. Connect wallet (Keplr / Leap)
 3. Place buy/sell orders on the Trade page
 4. Wait for batch settlement (10-block window)

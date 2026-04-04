@@ -13,7 +13,7 @@
 
 **1. Visit the Testnet App**
 ```
-URL: https://socialyield.vercel.app
+URL:  https://social-yield-sand.vercel.app/
 or
 Run locally: cd frontend && npm run dev
 ```
